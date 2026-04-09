@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { fmt, calcItem, STATUS_PESANAN, STATUS_COLOR } from '../lib/utils'
+import { toPng } from 'html-to-image'
+import Receipt from './Receipt'
 
 export default function DaftarTransaksi({ transactions, categories, onDelete, onUpdate, onDeleteAll, loading }) {
   const [search, setSearch] = useState('')
@@ -10,6 +12,9 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
   const [expanded, setExpanded] = useState(null)
   const [updating, setUpdating] = useState(null)
   const [addPay, setAddPay] = useState('')
+  const [receiptData, setReceiptData] = useState(null)
+  const receiptRef = useRef(null)
+  const [downloading, setDownloading] = useState(false)
 
   const today = new Date().toISOString().slice(0, 10)
 
@@ -132,6 +137,29 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
       alert(e.message)
     }
     setUpdating(null)
+  }
+
+  async function handleDownloadReceipt(group) {
+    setReceiptData(group)
+    setDownloading(true)
+    // Small delay to ensure the component is rendered in the DOM
+    setTimeout(async () => {
+      try {
+        if (receiptRef.current) {
+          const dataUrl = await toPng(receiptRef.current, { cacheBust: true, pixelRatio: 2 })
+          const link = document.createElement('a')
+          link.download = `Nota-${group.nama_pembeli || 'Pelanggan'}-${group.nama.replace(/\s+/g, '-')}.png`
+          link.href = dataUrl
+          link.click()
+        }
+      } catch (err) {
+        console.error('Download failed:', err)
+        alert('Gagal mendownload nota: ' + err.message)
+      } finally {
+        setDownloading(false)
+        setReceiptData(null)
+      }
+    }, 100)
   }
 
   return (
@@ -290,10 +318,16 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
                     )}
 
                     <div className="flex justify-between items-center mt-2 pt-3 border-t border-gray-100">
-                      <button onClick={() => handleDelete(g.id, g.batch_id)} disabled={deleting === g.id}
-                        className="text-xs text-red-500 hover:text-red-700 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                        🗑️ {deleting === g.id ? 'Menghapus...' : 'Hapus'}
-                      </button>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleDownloadReceipt(g)} disabled={downloading}
+                          className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                          📄 {downloading && receiptData?.id === g.id ? 'Memproses...' : 'Download Nota'}
+                        </button>
+                        <button onClick={() => handleDelete(g.id, g.batch_id)} disabled={deleting === g.id}
+                          className="text-xs text-red-500 hover:text-red-700 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                          🗑️ {deleting === g.id ? 'Menghapus...' : 'Hapus'}
+                        </button>
+                      </div>
                       <span className="text-[10px] text-gray-300 font-mono">{g.batch_id || 'single-item'}</span>
                     </div>
                   </div>
@@ -307,6 +341,10 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
       {filteredGroups.length > 0 && (
         <p className="text-xs text-gray-400 mt-4 font-medium italic">Menampilkan {filteredGroups.length} grup transaksi</p>
       )}
+      {/* Hidden Receipt for Capture */}
+      <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+        {receiptData && <Receipt ref={receiptRef} transaction={receiptData} />}
+      </div>
     </div>
   )
 }

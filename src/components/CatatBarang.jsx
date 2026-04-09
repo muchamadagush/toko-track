@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { STATUS_PESANAN, fmt, calcItem } from '../lib/utils'
+import { toPng } from 'html-to-image'
+import Receipt from './Receipt'
 
 const EMPTY_ITEM = { jenis: '', jumlah: 1, modal: '', jual: '' }
 const EMPTY = {
@@ -27,6 +29,9 @@ export default function CatatBarang({ onAdd, categories }) {
   }, [categories])
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+  const [lastSaved, setLastSaved] = useState(null)
+  const receiptRef = useRef(null)
 
   function today() { return new Date().toISOString().slice(0, 10) }
   function set(k, v) { setForm(p => ({ ...p, [k]: v })) }
@@ -61,6 +66,27 @@ export default function CatatBarang({ onAdd, categories }) {
     return acc
   }, { totalModal: 0, totalJual: 0, modalLain: 0, laba: 0, dibayar: 0, kurang: 0, margin: 0 }) : null
 
+  async function handleDownloadLastReceipt() {
+    if (!lastSaved) return
+    setDownloading(true)
+    setTimeout(async () => {
+      try {
+        if (receiptRef.current) {
+          const dataUrl = await toPng(receiptRef.current, { cacheBust: true, pixelRatio: 2 })
+          const link = document.createElement('a')
+          link.download = `Nota-${lastSaved.nama_pembeli || 'Pelanggan'}-${lastSaved.nama.replace(/\s+/g, '-')}.png`
+          link.href = dataUrl
+          link.click()
+        }
+      } catch (err) {
+        console.error('Download failed:', err)
+        alert('Gagal mendownload nota: ' + err.message)
+      } finally {
+        setDownloading(false)
+      }
+    }, 100)
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     const validItems = items.filter(it => it.modal > 0 && it.jual > 0)
@@ -90,9 +116,25 @@ export default function CatatBarang({ onAdd, categories }) {
           uang_dibayarkan: i === 0 ? (parseFloat(form.uang_dibayarkan) || 0) : 0,
         })
       }
+      
+      const savedGroup = {
+        nama: form.nama,
+        tanggal: form.tanggal,
+        nama_pembeli: form.nama_pembeli,
+        items: validItems.map(it => ({ ...it })),
+        totalJual: preview.totalJual,
+        dibayar: preview.dibayar,
+        kurang: preview.kurang,
+        catatan: form.catatan,
+        bahan_model: form.bahan_model
+      }
+      setLastSaved(savedGroup)
       setForm({ ...EMPTY, tanggal: today() })
       setSuccess(true)
-      setTimeout(() => setSuccess(false), 2500)
+      setTimeout(() => {
+        setSuccess(false)
+        setLastSaved(null)
+      }, 10000) // Keep success message longer to allow download
     } catch (err) {
       alert('Gagal menyimpan: ' + err.message)
     }
@@ -104,8 +146,16 @@ export default function CatatBarang({ onAdd, categories }) {
       <h2 className="text-lg font-semibold text-gray-900 mb-5">Tambah Pencatatan Barang</h2>
 
       {success && (
-        <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-medium flex items-center gap-2">
-          <span>✓</span> Data berhasil disimpan!
+        <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-medium flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span>✓</span> Data berhasil disimpan!
+          </div>
+          {lastSaved && (
+            <button type="button" onClick={handleDownloadLastReceipt} disabled={downloading}
+              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+              📄 {downloading ? 'Memproses...' : 'Download Nota Terakhir'}
+            </button>
+          )}
         </div>
       )}
 
@@ -290,6 +340,10 @@ export default function CatatBarang({ onAdd, categories }) {
           {loading ? 'Menyimpan...' : '+ Simpan Pencatatan'}
         </button>
       </form>
+      {/* Hidden Receipt for Capture */}
+      <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+        {lastSaved && <Receipt ref={receiptRef} transaction={lastSaved} />}
+      </div>
     </div>
   )
 }
