@@ -45,13 +45,18 @@ const Receipt = forwardRef(({ transaction }, ref) => {
 
             <div>
               <h1 className="text-3xl font-black text-black leading-tight">TS CLOTHING STORE</h1>
-              <p className="text-[14px] font-bold tracking-widest text-gray-800 border-b border-gray-800 pb-0.5 mb-1">
+              <p className="text-[14px] font-bold tracking-widest text-gray-800 border-b border-gray-800 pb-1 mb-2">
                 SABLON SATUAN - LUSINAN - BORDIR KOMPUTER
               </p>
-              <div className="text-[12px] font-bold leading-tight uppercase">
+              <div className="text-[12px] font-bold leading-normal uppercase space-y-0.5">
                 <p>Email: <span className="text-blue-600 underline">customyouridea21@gmail.com</span></p>
-                <p>Alamat: Peterongan Jombang</p>
-                <p className="ml-11">Ngunut Tulungagung</p>
+                <div className="flex">
+                  <span className="min-w-[55px]">Alamat:</span>
+                  <div>
+                    <p>Peterongan Jombang</p>
+                    <p>Ngunut Tulungagung</p>
+                  </div>
+                </div>
                 <p>G.Maps: TS Clothing / Custom Your Idea</p>
                 <p>HP / WA: 081336027807 / 081330349577</p>
               </div>
@@ -59,13 +64,13 @@ const Receipt = forwardRef(({ transaction }, ref) => {
           </div>
 
           <div className="text-right flex flex-col items-end gap-1">
-            <div className="text-[12px] font-bold flex gap-2">
+            <div className="text-[14px] font-bold flex gap-2">
               <span>Date :</span>
               <span className="border-b border-dotted border-gray-400 min-w-[120px] text-center">{tanggal}</span>
             </div>
-            <div className="text-[12px] font-bold flex flex-col items-start mt-2">
+            <div className="text-[14px] font-bold flex flex-col items-start mt-2">
               <span className="mb-1">Kepada Yth.</span>
-              <div className="border border-black w-48 h-12 p-1 text-sm font-bold flex items-center justify-center">
+              <div className="border border-black w-48 min-h-[48px] p-2 text-sm font-bold flex items-center justify-center text-center leading-tight">
                 {nama_pembeli || '-'}
               </div>
             </div>
@@ -93,8 +98,8 @@ const Receipt = forwardRef(({ transaction }, ref) => {
             </thead>
             <tbody>
               {displayItems.map((it, idx) => (
-                <tr key={idx} className="border-b border-gray-300 last:border-b-0 h-10">
-                  <td className="border-r-2 border-black px-4 text-sm font-bold uppercase">
+                <tr key={idx} className="border-b border-gray-300 last:border-b-0">
+                  <td className="border-r-2 border-black px-4 py-2 text-sm font-bold uppercase leading-tight">
                     {it.jumlah || it.jual ? (it.jenis ? `${nama} ${it.jenis}` : nama) : ''}
                   </td>
                   <td className="border-r-2 border-black px-2 text-sm font-bold text-center">{it.jumlah || ''}</td>
@@ -108,7 +113,7 @@ const Receipt = forwardRef(({ transaction }, ref) => {
 
         {/* Footer Section */}
         <div className="flex justify-between items-start mt-4">
-          <div className="text-[12px] font-bold leading-tight">
+          <div className="text-[14px] font-bold leading-tight">
             <p className="mb-1 uppercase tracking-tight">Rekening Pembayaran</p>
             <p>BRI : 0023 01 088774 50 4</p>
             <p>DANA : 0813 3602 7807</p>
@@ -140,11 +145,11 @@ const Receipt = forwardRef(({ transaction }, ref) => {
         {/* Signatures */}
         <div className="flex justify-around items-end mt-12 mb-8">
           <div className="text-center w-40">
-            <p className="text-[11px] font-black uppercase mb-16 tracking-widest">Tanda Terima</p>
+            <p className="text-[14px] font-black uppercase mb-16 tracking-widest">Tanda Terima</p>
             <div className="border-b-2 border-dotted border-black"></div>
           </div>
           <div className="text-center w-40">
-            <p className="text-[11px] font-black uppercase mb-16 tracking-widest">Hormat Kami</p>
+            <p className="text-[14px] font-black uppercase mb-16 tracking-widest">Hormat Kami</p>
             <div className="border-b-2 border-dotted border-black"></div>
           </div>
         </div>
