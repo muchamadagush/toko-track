@@ -32,7 +32,7 @@ export default function App() {
             <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center">
               <span className="text-white text-xs font-bold">T</span>
             </div>
-            <span className="font-bold text-gray-900 text-base">TokoTrack</span>
+            <span className="font-bold text-gray-900 text-base">TS Clothing</span>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${useSupabase ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>

@@ -1,5 +1,5 @@
 -- =============================================
--- TokoTrack — Supabase Database Setup
+-- TS Clothing — Supabase Database Setup
 -- Jalankan script ini di Supabase SQL Editor
 -- =============================================
 

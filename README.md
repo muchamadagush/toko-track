@@ -1,4 +1,4 @@
-# 🛒 TokoTrack — Aplikasi Pencatatan Barang
+# 🛒 TS Clothing — Aplikasi Pencatatan Barang
 
 Aplikasi pencatatan pengeluaran barang, harga modal, harga jual, perhitungan untung/rugi, dan rekap mingguan, bulanan, tahunan.
 

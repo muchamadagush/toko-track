@@ -88,11 +88,6 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
     setDeleting(null)
   }
 
-  async function handleDeleteAll() {
-    if (!confirm('Hapus SEMUA data transaksi? Tindakan ini tidak dapat dibatalkan.')) return
-    try { await onDeleteAll() } catch (e) { alert(e.message) }
-  }
-
   async function handleSetLunas(group) {
     if (!confirm('Set semua item dalam grup ini sebagai lunas?')) return
     setUpdating(group.id)
@@ -143,11 +138,6 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <h2 className="text-lg font-semibold text-gray-900">Daftar Transaksi</h2>
-        {transactions.length > 0 && (
-          <button onClick={handleDeleteAll} className="text-xs text-red-500 border border-red-200 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
-            Hapus Semua
-          </button>
-        )}
       </div>
 
       {/* Filters */}
@@ -302,7 +292,7 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
                     <div className="flex justify-between items-center mt-2 pt-3 border-t border-gray-100">
                       <button onClick={() => handleDelete(g.id, g.batch_id)} disabled={deleting === g.id}
                         className="text-xs text-red-500 hover:text-red-700 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                        🗑️ {deleting === g.id ? 'Menghapus...' : 'Hapus Grup'}
+                        🗑️ {deleting === g.id ? 'Menghapus...' : 'Hapus'}
                       </button>
                       <span className="text-[10px] text-gray-300 font-mono">{g.batch_id || 'single-item'}</span>
                     </div>
