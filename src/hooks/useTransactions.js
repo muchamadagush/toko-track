@@ -49,6 +49,8 @@ export function useTransactions() {
       status_pesanan: item.status_pesanan || 'Lunas',
       deadline: item.deadline || null,
       bahan_model: item.bahan_model || '',
+      jenis: item.jenis || '',
+      batch_id: item.batch_id || '',
       modal_lain: item.modal_lain || '',
       modal_lain_nominal: item.modal_lain_nominal || 0,
       uang_dibayarkan: item.uang_dibayarkan || 0,
@@ -72,15 +74,21 @@ export function useTransactions() {
     }
   }
 
-  const deleteTransaction = async (id) => {
+  const deleteTransaction = async (id, batchId) => {
     if (useSupabase) {
-      const { error } = await supabase.from('transactions').delete().eq('id', id)
+      const query = supabase.from('transactions').delete()
+      if (batchId) {
+        query.eq('batch_id', batchId)
+      } else {
+        query.eq('id', id)
+      }
+      const { error } = await query
       if (error) throw new Error(error.message)
     } else {
-      const updated = loadLocal().filter(d => d.id !== id)
+      const updated = loadLocal().filter(d => batchId ? d.batch_id !== batchId : d.id !== id)
       saveLocal(updated)
     }
-    setTransactions(prev => prev.filter(d => d.id !== id))
+    setTransactions(prev => prev.filter(d => batchId ? d.batch_id !== batchId : d.id !== id))
   }
 
   const deleteAll = async () => {

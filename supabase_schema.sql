@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   status_pesanan      text        NOT NULL DEFAULT 'Lunas',
   deadline            date,
   bahan_model         text,
+  jenis               text,
+  batch_id            text,
   modal_lain          text,
   modal_lain_nominal  numeric     NOT NULL DEFAULT 0,
   uang_dibayarkan     numeric     NOT NULL DEFAULT 0,
@@ -56,6 +58,8 @@ CREATE POLICY "Allow all for categories" ON public.categories FOR ALL TO anon, a
 -- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS status_pesanan     text NOT NULL DEFAULT 'Lunas';
 -- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS deadline           date;
 -- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS bahan_model        text;
+-- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS jenis              text;
+-- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS batch_id           text;
 -- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS modal_lain         text;
 -- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS modal_lain_nominal numeric NOT NULL DEFAULT 0;
 -- ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS uang_dibayarkan    numeric NOT NULL DEFAULT 0;

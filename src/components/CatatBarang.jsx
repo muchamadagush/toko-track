@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { STATUS_PESANAN, fmt, calcItem } from '../lib/utils'
 
+const EMPTY_ITEM = { jenis: '', jumlah: 1, modal: '', jual: '' }
 const EMPTY = {
   nama: '',
   tanggal: '',
-  jumlah: 1,
-  modal: '',
-  jual: '',
+  items: [{ ...EMPTY_ITEM }],
   kategori: 'Lainnya',
   catatan: '',
   nama_pembeli: '',
@@ -20,7 +19,7 @@ const EMPTY = {
 
 export default function CatatBarang({ onAdd, categories }) {
   const [form, setForm] = useState({ ...EMPTY, tanggal: today() })
-  
+
   useEffect(() => {
     if (categories.length > 0 && !form.kategori) {
       set('kategori', categories[0].name)
@@ -31,36 +30,66 @@ export default function CatatBarang({ onAdd, categories }) {
 
   function today() { return new Date().toISOString().slice(0, 10) }
   function set(k, v) { setForm(p => ({ ...p, [k]: v })) }
+  function setItem(idx, k, v) {
+    const newItems = [...form.items]
+    newItems[idx] = { ...newItems[idx], [k]: v }
+    set('items', newItems)
+  }
+  function addItem() { set('items', [...form.items, { ...EMPTY_ITEM }]) }
+  function removeItem(idx) {
+    if (form.items.length <= 1) return
+    set('items', form.items.filter((_, i) => i !== idx))
+  }
 
-  const modal = parseFloat(form.modal) || 0
-  const jual = parseFloat(form.jual) || 0
-  const jumlah = parseFloat(form.jumlah) || 1
-  const showPreview = modal > 0 && jual > 0
-  const preview = showPreview
-    ? calcItem({ modal, jual, jumlah, modal_lain_nominal: form.modal_lain_nominal })
-    : null
+  const items = form.items.map(it => ({
+    ...it,
+    modal: parseFloat(it.modal) || 0,
+    jual: parseFloat(it.jual) || 0,
+    jumlah: parseFloat(it.jumlah) || 1
+  }))
+
+  const showPreview = items.some(it => it.modal > 0 && it.jual > 0)
+  const preview = showPreview ? items.reduce((acc, it, idx) => {
+    const res = calcItem({ ...it, modal_lain_nominal: idx === 0 ? form.modal_lain_nominal : 0 })
+    acc.totalModal += res.totalModal
+    acc.totalJual += res.totalJual
+    acc.modalLain += res.modalLain
+    acc.laba += res.laba
+    acc.dibayar = parseFloat(form.uang_dibayarkan) || 0
+    acc.kurang = acc.totalJual - acc.dibayar
+    acc.margin = acc.totalModal > 0 ? (acc.laba / acc.totalModal) * 100 : 0
+    return acc
+  }, { totalModal: 0, totalJual: 0, modalLain: 0, laba: 0, dibayar: 0, kurang: 0, margin: 0 }) : null
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.nama.trim() || !form.tanggal || !modal || !jual || jumlah < 1) return
+    const validItems = items.filter(it => it.modal > 0 && it.jual > 0)
+    if (!form.nama.trim() || !form.tanggal || validItems.length === 0) return
+
+    const batch_id = Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
     setLoading(true)
     try {
-      await onAdd({
-        nama: form.nama.trim(),
-        tanggal: form.tanggal,
-        jumlah,
-        modal,
-        jual,
-        kategori: form.kategori,
-        catatan: form.catatan.trim(),
-        nama_pembeli: form.nama_pembeli.trim(),
-        status_pesanan: form.status_pesanan,
-        deadline: form.deadline || null,
-        bahan_model: form.bahan_model.trim(),
-        modal_lain: form.modal_lain.trim(),
-        modal_lain_nominal: parseFloat(form.modal_lain_nominal) || 0,
-        uang_dibayarkan: parseFloat(form.uang_dibayarkan) || 0,
-      })
+      for (let i = 0; i < validItems.length; i++) {
+        const it = validItems[i]
+        await onAdd({
+          nama: form.nama.trim(),
+          tanggal: form.tanggal,
+          jumlah: it.jumlah,
+          modal: it.modal,
+          jual: it.jual,
+          jenis: it.jenis.trim(),
+          batch_id,
+          kategori: form.kategori,
+          catatan: form.catatan.trim(),
+          nama_pembeli: form.nama_pembeli.trim(),
+          status_pesanan: form.status_pesanan,
+          deadline: form.deadline || null,
+          bahan_model: form.bahan_model.trim(),
+          modal_lain: i === 0 ? form.modal_lain.trim() : '',
+          modal_lain_nominal: i === 0 ? (parseFloat(form.modal_lain_nominal) || 0) : 0,
+          uang_dibayarkan: i === 0 ? (parseFloat(form.uang_dibayarkan) || 0) : 0,
+        })
+      }
       setForm({ ...EMPTY, tanggal: today() })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 2500)
@@ -89,7 +118,7 @@ export default function CatatBarang({ onAdd, categories }) {
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-gray-500 mb-1">Nama Barang *</label>
               <input className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Contoh: Beras 5kg" value={form.nama} onChange={e => set('nama', e.target.value)} required />
+                placeholder="Contoh: Jersey" value={form.nama} onChange={e => set('nama', e.target.value)} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
@@ -120,26 +149,48 @@ export default function CatatBarang({ onAdd, categories }) {
 
         <div className="border-t border-gray-100" />
 
-        {/* Harga & Jumlah */}
+        {/* Harga & Jumlah (Multiple Items) */}
         <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Harga & Jumlah</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Jumlah (unit) *</label>
-              <input type="number" min="1" className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                value={form.jumlah} onChange={e => set('jumlah', e.target.value)} required />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Harga Modal / unit (Rp) *</label>
-              <input type="number" min="0" className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="0" value={form.modal} onChange={e => set('modal', e.target.value)} required />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Harga Jual / unit (Rp) *</label>
-              <input type="number" min="0" className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="0" value={form.jual} onChange={e => set('jual', e.target.value)} required />
-            </div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Harga & Jumlah</p>
+            <button type="button" onClick={addItem} className="text-xs text-green-600 font-bold hover:text-green-700">+ Tambah Jenis</button>
           </div>
+
+          <div className="space-y-4">
+            {form.items.map((it, idx) => (
+              <div key={idx} className="bg-gray-50 border border-gray-100 rounded-xl p-4 relative group">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-500 mb-1">Jenis / Ukuran</label>
+                    <input className="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs focus:ring-1 focus:ring-green-500 outline-none"
+                      placeholder="Contoh: 5kg, XL, Merah" value={it.jenis} onChange={e => setItem(idx, 'jenis', e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-500 mb-1">Jumlah *</label>
+                    <input type="number" min="1" className="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs focus:ring-1 focus:ring-green-500 outline-none"
+                      value={it.jumlah} onChange={e => setItem(idx, 'jumlah', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-500 mb-1">Hrg Modal *</label>
+                    <input type="number" min="0" className="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs focus:ring-1 focus:ring-green-500 outline-none"
+                      placeholder="0" value={it.modal} onChange={e => setItem(idx, 'modal', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-500 mb-1">Hrg Jual *</label>
+                    <input type="number" min="0" className="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs focus:ring-1 focus:ring-green-500 outline-none"
+                      placeholder="0" value={it.jual} onChange={e => setItem(idx, 'jual', e.target.value)} required />
+                  </div>
+                </div>
+                {form.items.length > 1 && (
+                  <button type="button" onClick={() => removeItem(idx)}
+                    className="absolute -right-2 -top-2 bg-white border border-red-100 text-red-400 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-sm hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity">
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Modal Lain (keterangan)</label>
@@ -202,8 +253,8 @@ export default function CatatBarang({ onAdd, categories }) {
         {showPreview && (
           <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">Modal Barang</p>
-              <p className="font-semibold text-gray-800">{fmt(modal * jumlah)}</p>
+              <p className="text-xs text-gray-400 mb-0.5">Total Modal Barang</p>
+              <p className="font-semibold text-gray-800">{fmt(preview.totalModal - preview.modalLain)}</p>
             </div>
             {preview.modalLain > 0 && (
               <div>
