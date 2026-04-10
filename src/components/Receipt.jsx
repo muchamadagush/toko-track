@@ -27,32 +27,31 @@ const Receipt = forwardRef(({ transaction }, ref) => {
       {/* Container specifically for capture, fixed width for consistent rendering */}
       <div
         ref={ref}
-        className="bg-white w-[800px] shadow-lg p-6 font-sans text-gray-900 overflow-hidden relative"
+        className="bg-white w-[800px] min-w-[800px] max-w-[800px] shadow-lg p-8 font-sans text-gray-900 relative"
         style={{ minHeight: '1000px' }}
       >
         {/* Header Section */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex gap-4">
+        <div className="flex justify-between items-start mb-6 gap-6">
+          <div className="flex gap-4 w-[65%]">
             {/* Logo Image */}
-            <div className="flex items-center justify-center w-32 h-32 overflow-hidden">
+            <div className="flex-shrink-0 flex items-center justify-center w-32 h-32 overflow-hidden">
               <img
                 src="/logo.png"
                 alt="Logo"
                 className="object-contain w-full h-full"
-              //  style={{ filter: 'brightness(0) invert(1)' }} 
               />
             </div>
 
-            <div>
-              <h1 className="text-3xl font-black text-black leading-tight">TS CLOTHING STORE</h1>
-              <p className="text-[14px] font-bold tracking-widest text-gray-800 border-b border-gray-800 pb-1 mb-2">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl font-black text-black leading-tight break-words">TS CLOTHING STORE</h1>
+              <p className="text-[14px] font-bold tracking-widest text-gray-800 border-b border-gray-800 pb-1 mb-2 break-words whitespace-normal">
                 SABLON SATUAN - LUSINAN - BORDIR KOMPUTER
               </p>
-              <div className="text-[12px] font-bold leading-normal uppercase space-y-0.5">
+              <div className="text-[12px] font-bold leading-normal uppercase space-y-0.5 break-words">
                 <p>Email: <span className="text-blue-600 underline">customyouridea21@gmail.com</span></p>
                 <div className="flex">
                   <span className="min-w-[55px]">Alamat:</span>
-                  <div>
+                  <div className="flex-1">
                     <p>Peterongan Jombang</p>
                     <p>Ngunut Tulungagung</p>
                   </div>
@@ -63,14 +62,14 @@ const Receipt = forwardRef(({ transaction }, ref) => {
             </div>
           </div>
 
-          <div className="text-right flex flex-col items-end gap-1">
+          <div className="w-[35%] text-right flex flex-col items-end gap-1">
             <div className="text-[14px] font-bold flex gap-2">
               <span>Date :</span>
               <span className="border-b border-dotted border-gray-400 min-w-[120px] text-center">{tanggal}</span>
             </div>
-            <div className="text-[14px] font-bold flex flex-col items-start mt-2">
+            <div className="text-[14px] font-bold flex flex-col items-start mt-2 w-full">
               <span className="mb-1">Kepada Yth.</span>
-              <div className="border border-black w-48 min-h-[48px] p-2 text-sm font-bold flex items-center justify-center text-center leading-tight">
+              <div className="border border-black w-full min-h-[48px] p-2 text-sm font-bold flex items-center justify-center text-center leading-tight break-words overflow-hidden">
                 {nama_pembeli || '-'}
               </div>
             </div>
@@ -87,7 +86,7 @@ const Receipt = forwardRef(({ transaction }, ref) => {
 
         {/* Table Section */}
         <div className="border-2 border-black overflow-hidden mb-6">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse table-fixed">
             <thead className="bg-[#FFFF00] border-b-2 border-black">
               <tr>
                 <th className="border-r-2 border-black py-2 px-4 text-sm font-black text-center uppercase tracking-widest w-[40%]">Item</th>
@@ -99,7 +98,7 @@ const Receipt = forwardRef(({ transaction }, ref) => {
             <tbody>
               {displayItems.map((it, idx) => (
                 <tr key={idx} className="border-b border-gray-300 last:border-b-0">
-                  <td className="border-r-2 border-black px-4 py-2 text-sm font-bold uppercase leading-tight">
+                  <td className="border-r-2 border-black px-4 py-2 text-sm font-bold uppercase leading-tight break-words">
                     {it.jumlah || it.jual ? (it.jenis ? `${nama} ${it.jenis}` : nama) : ''}
                   </td>
                   <td className="border-r-2 border-black px-2 text-sm font-bold text-center">{it.jumlah || ''}</td>
@@ -120,7 +119,7 @@ const Receipt = forwardRef(({ transaction }, ref) => {
             <p>(A/N M Syahru Tsani Syafiq)</p>
 
             {catatan && (
-              <div className="mt-4 border-t border-gray-200 pt-1 italic text-gray-500">
+              <div className="mt-4 border-t border-gray-200 pt-1 italic text-gray-500 break-words whitespace-normal max-w-[400px]">
                 Catatan: {catatan}
               </div>
             )}
