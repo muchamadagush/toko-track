@@ -8,7 +8,7 @@ const EMPTY = {
   nama: '',
   tanggal: '',
   items: [{ ...EMPTY_ITEM }],
-  kategori: 'Lainnya',
+  kategori: '',
   catatan: '',
   nama_pembeli: '',
   status_pesanan: STATUS_PESANAN[0],
@@ -26,7 +26,7 @@ export default function CatatBarang({ onAdd, categories }) {
     if (categories.length > 0 && !form.kategori) {
       set('kategori', categories[0].name)
     }
-  }, [categories])
+  }, [categories, form.kategori])
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [downloading, setDownloading] = useState(false)
