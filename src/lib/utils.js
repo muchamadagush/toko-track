@@ -32,20 +32,25 @@ export function calcItem(item) {
   return { totalModal, totalJual, laba, margin, modalLain, dibayar, kurang }
 }
 
-export function calcSummary(items) {
-  return items.reduce(
+export function calcSummary(items, expenses = []) {
+  const summary = items.reduce(
     (acc, item) => {
       const { totalModal, totalJual, laba, dibayar, kurang } = calcItem(item)
       acc.totalModal += totalModal
       acc.totalJual += totalJual
-      acc.totalLaba += laba
+      acc.totalGrossLaba += laba // Rename internal totalLaba to Gross
       acc.totalDibayar += dibayar
       acc.totalKurang += kurang
       acc.count++
       return acc
     },
-    { totalModal: 0, totalJual: 0, totalLaba: 0, totalDibayar: 0, totalKurang: 0, count: 0 }
+    { totalModal: 0, totalJual: 0, totalGrossLaba: 0, totalDibayar: 0, totalKurang: 0, count: 0, totalExpense: 0, totalLaba: 0 }
   )
+
+  summary.totalExpense = expenses.reduce((acc, ex) => acc + (parseFloat(ex.nominal) || 0), 0)
+  summary.totalLaba = summary.totalGrossLaba - summary.totalExpense
+  
+  return summary
 }
 
 export const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']

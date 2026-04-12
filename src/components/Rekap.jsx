@@ -18,16 +18,18 @@ const CustomTooltip = ({ active, payload, label }) => {
   )
 }
 
-export default function Rekap({ transactions }) {
+export default function Rekap({ transactions, expenses = [] }) {
   const [period, setPeriod] = useState('minggu')
   const [selMonth, setSelMonth] = useState(now.getMonth())
   const [selYear, setSelYear] = useState(now.getFullYear())
 
   const years = useMemo(() => {
-    const ys = [...new Set(transactions.map(d => new Date(d.tanggal).getFullYear()))]
+    const fromT = transactions.map(d => new Date(d.tanggal).getFullYear())
+    const fromE = expenses.map(d => new Date(d.tanggal).getFullYear())
+    const ys = [...new Set([...fromT, ...fromE])]
     if (!ys.includes(now.getFullYear())) ys.unshift(now.getFullYear())
     return ys.sort((a, b) => b - a)
-  }, [transactions])
+  }, [transactions, expenses])
 
   const filtered = useMemo(() => {
     return transactions.filter(d => {
@@ -38,7 +40,16 @@ export default function Rekap({ transactions }) {
     })
   }, [transactions, period, selMonth, selYear])
 
-  const summary = useMemo(() => calcSummary(filtered), [filtered])
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(d => {
+      const dt = new Date(d.tanggal)
+      if (period === 'minggu') return (now - dt) / 86400000 <= 7
+      if (period === 'bulan') return dt.getFullYear() === +selYear && dt.getMonth() === +selMonth
+      return dt.getFullYear() === +selYear
+    })
+  }, [expenses, period, selMonth, selYear])
+
+  const summary = useMemo(() => calcSummary(filtered, filteredExpenses), [filtered, filteredExpenses])
   const margin = summary.totalModal > 0 ? (summary.totalLaba / summary.totalModal) * 100 : 0
 
   // Chart data
@@ -46,23 +57,28 @@ export default function Rekap({ transactions }) {
     if (period === 'tahun') {
       return MONTHS.map((m, i) => {
         const items = filtered.filter(d => new Date(d.tanggal).getMonth() === i)
-        const s = calcSummary(items)
-        return { name: m, Modal: Math.round(s.totalModal), Penjualan: Math.round(s.totalJual), 'Laba/Rugi': Math.round(s.totalLaba) }
-      }).filter(d => d.Modal > 0 || d.Penjualan > 0)
+        const exs = filteredExpenses.filter(d => new Date(d.tanggal).getMonth() === i)
+        const s = calcSummary(items, exs)
+        return { name: m, Modal: Math.round(s.totalModal), Penjualan: Math.round(s.totalJual), Pengeluaran: Math.round(s.totalExpense), 'Laba Bersih': Math.round(s.totalLaba) }
+      }).filter(d => d.Modal > 0 || d.Penjualan > 0 || d.Pengeluaran > 0)
     }
     const byDate = {}
     filtered.forEach(d => {
-      if (!byDate[d.tanggal]) byDate[d.tanggal] = []
-      byDate[d.tanggal].push(d)
+      if (!byDate[d.tanggal]) byDate[d.tanggal] = { items: [], exs: [] }
+      byDate[d.tanggal].items.push(d)
+    })
+    filteredExpenses.forEach(d => {
+      if (!byDate[d.tanggal]) byDate[d.tanggal] = { items: [], exs: [] }
+      byDate[d.tanggal].exs.push(d)
     })
     return Object.entries(byDate)
       .sort(([a], [b]) => new Date(a) - new Date(b))
-      .map(([date, items]) => {
-        const s = calcSummary(items)
+      .map(([date, data]) => {
+        const s = calcSummary(data.items, data.exs)
         const label = new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
-        return { name: label, Modal: Math.round(s.totalModal), Penjualan: Math.round(s.totalJual), 'Laba/Rugi': Math.round(s.totalLaba) }
+        return { name: label, Modal: Math.round(s.totalModal), Penjualan: Math.round(s.totalJual), Pengeluaran: Math.round(s.totalExpense), 'Laba Bersih': Math.round(s.totalLaba) }
       })
-  }, [filtered, period])
+  }, [filtered, filteredExpenses, period])
 
   // By kategori
   const byKategori = useMemo(() => {
@@ -165,11 +181,12 @@ export default function Rekap({ transactions }) {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {[
               { label: 'Total Transaksi', val: `${filtered.length} item` },
               { label: 'Total Modal', val: fmtShort(summary.totalModal) },
               { label: 'Total Penjualan', val: fmtShort(summary.totalJual) },
+              { label: 'Total Pengeluaran', val: fmtShort(summary.totalExpense), color: 'text-red-500' },
               { label: 'Total Dibayar', val: fmtShort(summary.totalDibayar), color: 'text-blue-600' },
               { label: 'Total Kekurangan', val: fmtShort(summary.totalKurang), color: summary.totalKurang > 0 ? 'text-orange-600' : 'text-gray-400' },
             ].map(c => (
@@ -180,7 +197,7 @@ export default function Rekap({ transactions }) {
             ))}
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center mt-3">
-            <p className="text-xs text-gray-400 mb-1">{summary.totalLaba >= 0 ? 'Total Keuntungan' : 'Total Kerugian'}</p>
+            <p className="text-xs text-gray-400 mb-1">{summary.totalLaba >= 0 ? 'Total Laba Bersih' : 'Total Rugi Bersih'}</p>
             <p className={`text-2xl font-black ${summary.totalLaba >= 0 ? 'text-green-600' : 'text-red-500'}`}>{fmt(summary.totalLaba)}</p>
           </div>
 
@@ -226,7 +243,8 @@ export default function Rekap({ transactions }) {
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="Modal" fill="#93c5fd" radius={[4,4,0,0]} />
                   <Bar dataKey="Penjualan" fill="#16a34a" radius={[4,4,0,0]} />
-                  <Bar dataKey="Laba/Rugi" fill="#f59e0b" radius={[4,4,0,0]} />
+                  <Bar dataKey="Pengeluaran" fill="#ef4444" radius={[4,4,0,0]} />
+                  <Bar dataKey="Laba Bersih" fill="#f59e0b" radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

@@ -3,13 +3,17 @@ import CatatBarang from './components/CatatBarang'
 import DaftarTransaksi from './components/DaftarTransaksi'
 import Rekap from './components/Rekap'
 import KelolaKategori from './components/KelolaKategori'
+import CatatPengeluaran from './components/CatatPengeluaran'
+import DaftarPengeluaran from './components/DaftarPengeluaran'
 import { useTransactions } from './hooks/useTransactions'
+import { useExpenses } from './hooks/useExpenses'
 import { useCategories } from './hooks/useCategories'
 import { calcSummary, fmtShort } from './lib/utils'
 
 const TABS = [
   { id: 'catat', label: 'Catat Barang' },
   { id: 'daftar', label: 'Transaksi' },
+  { id: 'pengeluaran', label: 'Pengeluaran' },
   { id: 'rekap', label: 'Rekap' },
   { id: 'kategori', label: 'Kategori' },
 ]
@@ -17,11 +21,12 @@ const TABS = [
 export default function App() {
   const [tab, setTab] = useState('catat')
   const { transactions, loading: tLoading, error: tError, addTransaction, updateTransaction, deleteTransaction, deleteAll, useSupabase } = useTransactions()
+  const { expenses, loading: eLoading, addExpense, deleteExpense, deleteAll: deleteAllExpenses } = useExpenses()
   const { categories, loading: cLoading, addCategory, updateCategory, deleteCategory } = useCategories()
 
-  const loading = tLoading
+  const loading = tLoading || eLoading
   const error = tError
-  const summary = calcSummary(transactions)
+  const summary = calcSummary(transactions, expenses)
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -50,17 +55,18 @@ export default function App() {
         )}
 
         {/* Summary Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
           {[
             { label: 'Total Transaksi', val: `${summary.count} item` },
             { label: 'Total Modal', val: fmtShort(summary.totalModal) },
             { label: 'Total Penjualan', val: fmtShort(summary.totalJual) },
-            { label: summary.totalLaba >= 0 ? 'Keuntungan' : 'Kerugian', val: fmtShort(summary.totalLaba), highlight: summary.totalLaba >= 0 ? 'green' : 'red' },
+            { label: 'Pengeluaran', val: fmtShort(summary.totalExpense), highlight: 'red' },
+            { label: summary.totalLaba >= 0 ? 'Laba Bersih' : 'Rugi Bersih', val: fmtShort(summary.totalLaba), highlight: summary.totalLaba >= 0 ? 'green' : 'red' },
           ].map(c => (
             <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3">
               <p className="text-xs text-gray-400 mb-0.5">{c.label}</p>
               <p className={`text-lg font-bold ${c.highlight === 'green' ? 'text-green-600' : c.highlight === 'red' ? 'text-red-500' : 'text-gray-800'}`}>
-                {summary.count === 0 ? (c.label === 'Total Transaksi' ? '0 item' : 'Rp 0') : c.val}
+                {summary.count === 0 && c.label !== 'Pengeluaran' ? (c.label === 'Total Transaksi' ? '0 item' : 'Rp 0') : c.val}
               </p>
             </div>
           ))}
@@ -78,7 +84,13 @@ export default function App() {
 
         {tab === 'catat' && <CatatBarang onAdd={addTransaction} categories={categories} />}
         {tab === 'daftar' && <DaftarTransaksi transactions={transactions} categories={categories} onDelete={deleteTransaction} onUpdate={updateTransaction} onDeleteAll={deleteAll} loading={loading} />}
-        {tab === 'rekap' && <Rekap transactions={transactions} />}
+        {tab === 'pengeluaran' && (
+          <div className="space-y-6">
+            <CatatPengeluaran onAdd={addExpense} />
+            <DaftarPengeluaran expenses={expenses} onDelete={deleteExpense} onDeleteAll={deleteAllExpenses} loading={loading} />
+          </div>
+        )}
+        {tab === 'rekap' && <Rekap transactions={transactions} expenses={expenses} />}
         {tab === 'kategori' && (
           <KelolaKategori
             categories={categories}

@@ -27,16 +27,32 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   created_at          timestamptz NOT NULL DEFAULT now()
 );
 
+-- Buat tabel expenses
+CREATE TABLE IF NOT EXISTS public.expenses (
+  id          uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
+  tanggal     date         NOT NULL,
+  nominal     numeric      NOT NULL CHECK (nominal > 0),
+  keterangan  text         NOT NULL,
+  created_at  timestamptz  NOT NULL DEFAULT now()
+);
+
 -- Index
 CREATE INDEX IF NOT EXISTS idx_transactions_tanggal   ON public.transactions (tanggal DESC);
 CREATE INDEX IF NOT EXISTS idx_transactions_kategori  ON public.transactions (kategori);
 CREATE INDEX IF NOT EXISTS idx_transactions_status    ON public.transactions (status_pesanan);
 CREATE INDEX IF NOT EXISTS idx_transactions_deadline  ON public.transactions (deadline);
+CREATE INDEX IF NOT EXISTS idx_expenses_tanggal       ON public.expenses (tanggal DESC);
 
 -- Row Level Security
 ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow all for anon" ON public.transactions
+  FOR ALL TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "Allow all for expenses" ON public.expenses
   FOR ALL TO anon, authenticated
   USING (true)
   WITH CHECK (true);
