@@ -3,7 +3,8 @@ import { fmt, calcItem, STATUS_PESANAN, STATUS_COLOR } from '../lib/utils'
 import { toPng } from 'html-to-image'
 import Receipt from './Receipt'
 
-export default function DaftarTransaksi({ transactions, categories, onDelete, onUpdate, onDeleteAll, loading }) {
+export default function DaftarTransaksi({ transactions, categories, onDelete, onUpdate, onDeleteAll, loading, profile }) {
+  const isOwner = profile?.role === 'owner'
   const [search, setSearch] = useState('')
   const [filterKat, setFilterKat] = useState('Semua')
   const [filterStatus, setFilterStatus] = useState('Semua')
@@ -229,10 +230,12 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
                       <span>{g.kategori}</span>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className={`font-black text-base ${profitCls}`}>{fmt(g.laba)}</p>
-                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">{g.margin.toFixed(1)}% margin</p>
-                  </div>
+                  {isOwner && (
+                    <div className="text-right shrink-0">
+                      <p className={`font-black text-base ${profitCls}`}>{fmt(g.laba)}</p>
+                      <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">{g.margin.toFixed(1)}% margin</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Detail expanded */}
@@ -246,7 +249,7 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
                             <th className="px-3 py-2">Jenis</th>
                             <th className="px-3 py-2 text-center">Qty</th>
                             <th className="px-3 py-2 text-right">Hrg Jual / u</th>
-                            <th className="px-3 py-2 text-right">Laba</th>
+                            {isOwner && <th className="px-3 py-2 text-right">Laba</th>}
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -257,7 +260,7 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
                                 <td className="px-3 py-2.5 font-medium text-gray-700">{it.jenis || '-'}</td>
                                 <td className="px-3 py-2.5 text-center text-gray-500">{it.jumlah}</td>
                                 <td className="px-3 py-2.5 text-right text-gray-700">{fmt(it.jual)}</td>
-                                <td className={`px-3 py-2.5 text-right font-bold ${res.laba >= 0 ? 'text-green-600' : 'text-red-500'}`}>{fmt(res.laba)}</td>
+                                {isOwner && <td className={`px-3 py-2.5 text-right font-bold ${res.laba >= 0 ? 'text-green-600' : 'text-red-500'}`}>{fmt(res.laba)}</td>}
                               </tr>
                             )
                           })}
@@ -265,11 +268,13 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
                       </table>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-4">
-                      <div>
-                        <p className="text-xs text-gray-400 mb-0.5">Total Modal</p>
-                        <p className="font-semibold text-gray-900">{fmt(g.totalModal)}</p>
-                      </div>
+                    <div className={`grid grid-cols-2 ${isOwner ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4 text-sm mb-4`}>
+                      {isOwner && (
+                        <div>
+                          <p className="text-xs text-gray-400 mb-0.5">Total Modal</p>
+                          <p className="font-semibold text-gray-900">{fmt(g.totalModal)}</p>
+                        </div>
+                      )}
                       <div>
                         <p className="text-xs text-gray-400 mb-0.5">Total Jual</p>
                         <p className="font-semibold text-gray-900">{fmt(g.totalJual)}</p>

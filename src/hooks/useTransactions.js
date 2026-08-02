@@ -10,32 +10,54 @@ function saveLocal(data) {
   localStorage.setItem(LS_KEY, JSON.stringify(data))
 }
 
-export function useTransactions() {
+export function useTransactions(profile, selectedBranchId) {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const useSupabase = !!supabase
 
   const fetchAll = useCallback(async () => {
+    if (useSupabase && !profile) {
+      setTransactions([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
     if (useSupabase) {
-      const { data, error } = await supabase
+      const query = supabase
         .from('transactions')
         .select('*')
+      
+      if (profile?.store_id) {
+        query.eq('store_id', profile.store_id)
+      }
+
+      if (selectedBranchId && selectedBranchId !== 'all') {
+        query.eq('branch_id', selectedBranchId)
+      }
+      
+      const { data, error } = await query
         .order('tanggal', { ascending: false })
         .order('created_at', { ascending: false })
+        
       if (error) { setError(error.message); setLoading(false); return }
       setTransactions(data || [])
     } else {
-      setTransactions(loadLocal())
+      // Mock Local Filter
+      let localData = loadLocal()
+      if (selectedBranchId && selectedBranchId !== 'all') {
+        localData = localData.filter(t => t.branch_id === selectedBranchId)
+      }
+      setTransactions(localData)
     }
     setLoading(false)
-  }, [useSupabase])
+  }, [useSupabase, profile, selectedBranchId])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
   const addTransaction = async (item) => {
+    const activeBranchId = selectedBranchId && selectedBranchId !== 'all' ? selectedBranchId : (profile?.branch_id || null)
     // Ensure all fields have defaults
     const payload = {
       nama: item.nama,
@@ -54,6 +76,8 @@ export function useTransactions() {
       modal_lain: item.modal_lain || '',
       modal_lain_nominal: item.modal_lain_nominal || 0,
       uang_dibayarkan: item.uang_dibayarkan || 0,
+      store_id: profile?.store_id || null,
+      branch_id: activeBranchId,
     }
 
     if (useSupabase) {
@@ -73,6 +97,7 @@ export function useTransactions() {
       return newItem
     }
   }
+
 
   const deleteTransaction = async (id, batchId) => {
     if (useSupabase) {

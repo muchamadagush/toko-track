@@ -21,42 +21,67 @@ function saveLocal(data) {
   localStorage.setItem(LS_KEY, JSON.stringify(data))
 }
 
-export function useCategories() {
+export function useCategories(profile) {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const useSupabase = !!supabase
 
   const fetchAll = useCallback(async () => {
+    if (useSupabase && !profile) {
+      setCategories([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
     if (useSupabase) {
-      const { data, error } = await supabase
-        .from('categories')
+      const query = supabase
+        .from('categories_view')
         .select('*')
+      
+      if (profile?.store_id) {
+        query.eq('store_id', profile.store_id)
+      }
+      
+      const { data, error } = await query
         .order('name', { ascending: true })
+        
       if (error) { setError(error.message); setLoading(false); return }
       setCategories(data || [])
     } else {
       setCategories(loadLocal())
     }
     setLoading(false)
-  }, [useSupabase])
+  }, [useSupabase, profile])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
-  const addCategory = async (name) => {
+  const addCategory = async (name, modal = 0, modal_lain = '', modal_lain_nominal = 0) => {
     if (useSupabase) {
+      const payload = {
+        name,
+        store_id: profile?.store_id || null,
+        modal: parseFloat(modal) || 0,
+        modal_lain: modal_lain || '',
+        modal_lain_nominal: parseFloat(modal_lain_nominal) || 0
+      }
       const { data, error } = await supabase
         .from('categories')
-        .insert([{ name }])
+        .insert([payload])
         .select()
         .single()
       if (error) throw new Error(error.message)
       setCategories(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
       return data
     } else {
-      const newItem = { id: Date.now().toString(), name }
+      const newItem = { 
+        id: Date.now().toString(), 
+        name, 
+        modal: parseFloat(modal) || 0, 
+        modal_lain: modal_lain || '', 
+        modal_lain_nominal: parseFloat(modal_lain_nominal) || 0 
+      }
       const updated = [...loadLocal(), newItem].sort((a, b) => a.name.localeCompare(b.name))
       saveLocal(updated)
       setCategories(updated)
@@ -64,11 +89,17 @@ export function useCategories() {
     }
   }
 
-  const updateCategory = async (id, name) => {
+
+  const updateCategory = async (id, name, modal = 0, modal_lain = '', modal_lain_nominal = 0) => {
     if (useSupabase) {
       const { data, error } = await supabase
         .from('categories')
-        .update({ name })
+        .update({ 
+          name, 
+          modal: parseFloat(modal) || 0, 
+          modal_lain: modal_lain || '', 
+          modal_lain_nominal: parseFloat(modal_lain_nominal) || 0 
+        })
         .eq('id', id)
         .select()
         .single()
@@ -76,7 +107,13 @@ export function useCategories() {
       setCategories(prev => prev.map(c => c.id === id ? data : c).sort((a, b) => a.name.localeCompare(b.name)))
       return data
     } else {
-      const updated = loadLocal().map(c => c.id === id ? { ...c, name } : c).sort((a, b) => a.name.localeCompare(b.name))
+      const updated = loadLocal().map(c => c.id === id ? { 
+        ...c, 
+        name, 
+        modal: parseFloat(modal) || 0, 
+        modal_lain: modal_lain || '', 
+        modal_lain_nominal: parseFloat(modal_lain_nominal) || 0 
+      } : c).sort((a, b) => a.name.localeCompare(b.name))
       saveLocal(updated)
       setCategories(updated)
       return updated.find(c => c.id === id)

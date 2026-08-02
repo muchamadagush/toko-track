@@ -10,36 +10,60 @@ function saveLocal(data) {
   localStorage.setItem(LS_KEY, JSON.stringify(data))
 }
 
-export function useExpenses() {
+export function useExpenses(profile, selectedBranchId) {
   const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const useSupabase = !!supabase
 
   const fetchAll = useCallback(async () => {
+    if (useSupabase && !profile) {
+      setExpenses([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
     if (useSupabase) {
-      const { data, error } = await supabase
+      const query = supabase
         .from('expenses')
         .select('*')
+      
+      if (profile?.store_id) {
+        query.eq('store_id', profile.store_id)
+      }
+
+      if (selectedBranchId && selectedBranchId !== 'all') {
+        query.eq('branch_id', selectedBranchId)
+      }
+      
+      const { data, error } = await query
         .order('tanggal', { ascending: false })
         .order('created_at', { ascending: false })
+        
       if (error) { setError(error.message); setLoading(false); return }
       setExpenses(data || [])
     } else {
-      setExpenses(loadLocal())
+      // Mock Local Filter
+      let localData = loadLocal()
+      if (selectedBranchId && selectedBranchId !== 'all') {
+        localData = localData.filter(t => t.branch_id === selectedBranchId)
+      }
+      setExpenses(localData)
     }
     setLoading(false)
-  }, [useSupabase])
+  }, [useSupabase, profile, selectedBranchId])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
   const addExpense = async (item) => {
+    const activeBranchId = selectedBranchId && selectedBranchId !== 'all' ? selectedBranchId : (profile?.branch_id || null)
     const payload = {
       tanggal: item.tanggal,
       nominal: parseFloat(item.nominal) || 0,
       keterangan: item.keterangan.trim(),
+      store_id: profile?.store_id || null,
+      branch_id: activeBranchId,
     }
 
     if (useSupabase) {
@@ -59,6 +83,7 @@ export function useExpenses() {
       return newItem
     }
   }
+
 
   const deleteExpense = async (id) => {
     if (useSupabase) {

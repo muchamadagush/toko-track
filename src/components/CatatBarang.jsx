@@ -19,14 +19,10 @@ const EMPTY = {
   uang_dibayarkan: '',
 }
 
-export default function CatatBarang({ onAdd, categories }) {
+export default function CatatBarang({ onAdd, categories, profile }) {
+  const isOwner = profile?.role === 'owner'
   const [form, setForm] = useState({ ...EMPTY, tanggal: today() })
 
-  useEffect(() => {
-    if (categories.length > 0 && !form.kategori) {
-      set('kategori', categories[0].name)
-    }
-  }, [categories, form.kategori])
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [downloading, setDownloading] = useState(false)
@@ -46,16 +42,21 @@ export default function CatatBarang({ onAdd, categories }) {
     set('items', form.items.filter((_, i) => i !== idx))
   }
 
+  const selectedCat = categories.find(c => c.name === form.kategori)
+  const catModal = selectedCat?.modal || 0
+  const catModalLain = selectedCat?.modal_lain || ''
+  const catModalLainNominal = selectedCat?.modal_lain_nominal || 0
+
   const items = form.items.map(it => ({
     ...it,
-    modal: parseFloat(it.modal) || 0,
+    modal: catModal,
     jual: parseFloat(it.jual) || 0,
     jumlah: parseFloat(it.jumlah) || 1
   }))
 
-  const showPreview = items.some(it => it.modal > 0 && it.jual > 0)
+  const showPreview = items.some(it => it.jual > 0)
   const preview = showPreview ? items.reduce((acc, it, idx) => {
-    const res = calcItem({ ...it, modal_lain_nominal: idx === 0 ? form.modal_lain_nominal : 0 })
+    const res = calcItem({ ...it, modal_lain_nominal: idx === 0 ? catModalLainNominal : 0 })
     acc.totalModal += res.totalModal
     acc.totalJual += res.totalJual
     acc.modalLain += res.modalLain
@@ -89,7 +90,7 @@ export default function CatatBarang({ onAdd, categories }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const validItems = items.filter(it => it.modal > 0 && it.jual > 0)
+    const validItems = items.filter(it => it.jual > 0)
     if (!form.nama.trim() || !form.tanggal || validItems.length === 0) return
 
     const batch_id = Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
@@ -101,18 +102,18 @@ export default function CatatBarang({ onAdd, categories }) {
           nama: form.nama.trim(),
           tanggal: form.tanggal,
           jumlah: it.jumlah,
-          modal: it.modal,
+          modal: catModal, // Auto populated from category
           jual: it.jual,
           jenis: it.jenis.trim(),
           batch_id,
-          kategori: form.kategori,
+          kategori: form.kategori || 'Lainnya',
           catatan: form.catatan.trim(),
           nama_pembeli: form.nama_pembeli.trim(),
           status_pesanan: form.status_pesanan,
           deadline: form.deadline || null,
           bahan_model: form.bahan_model.trim(),
-          modal_lain: i === 0 ? form.modal_lain.trim() : '',
-          modal_lain_nominal: i === 0 ? (parseFloat(form.modal_lain_nominal) || 0) : 0,
+          modal_lain: i === 0 ? catModalLain : '',
+          modal_lain_nominal: i === 0 ? catModalLainNominal : 0,
           uang_dibayarkan: i === 0 ? (parseFloat(form.uang_dibayarkan) || 0) : 0,
         })
       }
@@ -171,9 +172,10 @@ export default function CatatBarang({ onAdd, categories }) {
                 placeholder="Contoh: Jersey" value={form.nama} onChange={e => set('nama', e.target.value)} required />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Kategori *</label>
               <select className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                value={form.kategori} onChange={e => set('kategori', e.target.value)}>
+                value={form.kategori} onChange={e => set('kategori', e.target.value)} required>
+                <option value="">-- Pilih Kategori --</option>
                 {categories.map(k => <option key={k.id} value={k.name}>{k.name}</option>)}
               </select>
             </div>
@@ -209,7 +211,7 @@ export default function CatatBarang({ onAdd, categories }) {
           <div className="space-y-4">
             {form.items.map((it, idx) => (
               <div key={idx} className="bg-gray-50 border border-gray-100 rounded-xl p-4 relative group">
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-[10px] font-medium text-gray-500 mb-1">Jenis / Ukuran</label>
                     <input className="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs focus:ring-1 focus:ring-green-500 outline-none"
@@ -219,11 +221,6 @@ export default function CatatBarang({ onAdd, categories }) {
                     <label className="block text-[10px] font-medium text-gray-500 mb-1">Jumlah *</label>
                     <input type="number" min="1" className="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs focus:ring-1 focus:ring-green-500 outline-none"
                       value={it.jumlah} onChange={e => setItem(idx, 'jumlah', e.target.value)} required />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-medium text-gray-500 mb-1">Hrg Modal *</label>
-                    <input type="number" min="0" className="w-full border border-gray-200 rounded-lg px-2 py-2 text-xs focus:ring-1 focus:ring-green-500 outline-none"
-                      placeholder="0" value={it.modal} onChange={e => setItem(idx, 'modal', e.target.value)} required />
                   </div>
                   <div>
                     <label className="block text-[10px] font-medium text-gray-500 mb-1">Hrg Jual *</label>
@@ -239,20 +236,6 @@ export default function CatatBarang({ onAdd, categories }) {
                 )}
               </div>
             ))}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Modal Lain (keterangan)</label>
-              <input className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Contoh: Ongkos jahit, Packaging, Bensin"
-                value={form.modal_lain} onChange={e => set('modal_lain', e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Nominal Modal Lain (Rp)</label>
-              <input type="number" min="0" className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="0" value={form.modal_lain_nominal} onChange={e => set('modal_lain_nominal', e.target.value)} />
-            </div>
           </div>
         </div>
 
@@ -301,31 +284,37 @@ export default function CatatBarang({ onAdd, categories }) {
 
         {/* Preview */}
         {showPreview && (
-          <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-xs text-gray-400 mb-0.5">Total Modal Barang</p>
-              <p className="font-semibold text-gray-800">{fmt(preview.totalModal - preview.modalLain)}</p>
-            </div>
-            {preview.modalLain > 0 && (
-              <div>
-                <p className="text-xs text-gray-400 mb-0.5">Modal Lain</p>
-                <p className="font-semibold text-gray-800">{fmt(preview.modalLain)}</p>
-              </div>
+          <div className={`bg-gray-50 rounded-xl p-4 grid grid-cols-2 ${isOwner ? 'sm:grid-cols-4' : 'sm:grid-cols-2'} gap-4 text-sm`}>
+            {isOwner && (
+              <>
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Total Modal Barang</p>
+                  <p className="font-semibold text-gray-800">{fmt(preview.totalModal - preview.modalLain)}</p>
+                </div>
+                {preview.modalLain > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5">Modal Lain</p>
+                    <p className="font-semibold text-gray-800">{fmt(preview.modalLain)}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Total Modal</p>
+                  <p className="font-semibold text-gray-800">{fmt(preview.totalModal)}</p>
+                </div>
+              </>
             )}
-            <div>
-              <p className="text-xs text-gray-400 mb-0.5">Total Modal</p>
-              <p className="font-semibold text-gray-800">{fmt(preview.totalModal)}</p>
-            </div>
             <div>
               <p className="text-xs text-gray-400 mb-0.5">Total Harga Jual</p>
               <p className="font-semibold text-gray-800">{fmt(preview.totalJual)}</p>
             </div>
-            <div>
-              <p className="text-xs text-gray-400 mb-0.5">{preview.laba >= 0 ? 'Keuntungan' : 'Kerugian'}</p>
-              <p className={`font-semibold ${preview.laba >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                {fmt(preview.laba)} <span className="text-xs font-normal">({preview.margin.toFixed(1)}%)</span>
-              </p>
-            </div>
+            {isOwner && (
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">{preview.laba >= 0 ? 'Keuntungan' : 'Kerugian'}</p>
+                <p className={`font-semibold ${preview.laba >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                  {fmt(preview.laba)} <span className="text-xs font-normal">({preview.margin.toFixed(1)}%)</span>
+                </p>
+              </div>
+            )}
             <div className="border-l border-gray-200 pl-4">
               <p className="text-xs text-gray-400 mb-0.5">Kekurangan</p>
               <p className={`font-bold ${preview.kurang > 0 ? 'text-orange-600' : 'text-gray-400'}`}>

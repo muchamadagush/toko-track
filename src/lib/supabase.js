@@ -10,3 +10,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
+
+export const signIn = (email, password) => {
+  if (!supabase) throw new Error('Supabase is not configured')
+  return supabase.auth.signInWithPassword({ email, password })
+}
+
+export const signUp = (email, password) => {
+  if (!supabase) throw new Error('Supabase is not configured')
+  return supabase.auth.signUp({ email, password })
+}
+
+export const resetPassword = (email) => {
+  if (!supabase) throw new Error('Supabase is not configured')
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  })
+}
+
+export const signOut = () => {
+  if (!supabase) throw new Error('Supabase is not configured')
+  return supabase.auth.signOut()
+}
+
