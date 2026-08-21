@@ -196,7 +196,8 @@ export default function ManajemenToko({ profile, useSupabase }) {
             id: staffUser.id,
             store_id: profile.store_id,
             branch_id: staffBranchId || null,
-            role: staffRole
+            role: staffRole,
+            email: staffEmail.trim()
           }])
         if (profileErr) throw profileErr
 
@@ -392,7 +393,7 @@ export default function ManajemenToko({ profile, useSupabase }) {
                 {staffList.map((staff) => (
                   <tr key={staff.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50">
                     <td className="py-4 font-medium text-gray-900 break-all pr-2">
-                      {staff.email || `Staff (${staff.id.slice(0, 8)})`}
+                      {staff.email}
                     </td>
                     <td className="py-4">
                       {staff.id === profile.id ? (

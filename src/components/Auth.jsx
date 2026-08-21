@@ -108,7 +108,8 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
               id: user.id,
               store_id: store.id,
               branch_id: branch.id,
-              role: 'owner'
+              role: 'owner',
+              email: email.trim()
             }])
           if (profileErr) throw profileErr
 
