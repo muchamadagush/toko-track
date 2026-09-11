@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import LandingPage from './components/LandingPage'
 import CatatBarang from './components/CatatBarang'
 import DaftarTransaksi from './components/DaftarTransaksi'
 import Rekap from './components/Rekap'
@@ -14,7 +16,8 @@ import { useCategories } from './hooks/useCategories'
 import { calcSummary, fmtShort, fmt } from './lib/utils'
 import { supabase, signOut } from './lib/supabase'
 
-export default function App() {
+// ─── App Dashboard (existing app logic) ───────────────────────────
+function AppDashboard() {
   const [tab, setTab] = useState('catat')
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -337,5 +340,15 @@ export default function App() {
         </main>
       </div>
     </div>
+  )
+}
+
+// ─── Root App with Routes ─────────────────────────────────────────
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/app" element={<AppDashboard />} />
+    </Routes>
   )
 }
