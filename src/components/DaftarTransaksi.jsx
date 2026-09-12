@@ -50,7 +50,15 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
       acc.kurang += res.kurang
       return acc
     }, { totalModal: 0, totalJual: 0, laba: 0, dibayar: 0, kurang: 0 })
-    return { ...g, ...s, margin: s.totalModal > 0 ? (s.laba / s.totalModal) * 100 : 0 }
+    
+    let dynamicStatus = g.status_pesanan
+    if (s.kurang <= 0) {
+      dynamicStatus = 'Lunas'
+    } else if (s.dibayar > 0) {
+      dynamicStatus = 'DP / Belum Lunas'
+    }
+    
+    return { ...g, ...s, status_pesanan: dynamicStatus, margin: s.totalModal > 0 ? (s.laba / s.totalModal) * 100 : 0 }
   })
 
   // 2. Filter groups
@@ -116,21 +124,27 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
     if (nominal <= 0) return
     setUpdating(group.id)
     try {
-      // Proportional payment or just pay the first item with debt?
-      // Let's just pay the first non-paid item for simplicity
       let remaining = nominal
+      const isFullyPaid = nominal >= group.kurang
+
       for (const it of group.items) {
-        if (remaining <= 0) break
         const { totalJual, dibayar } = calcItem(it)
         const debt = totalJual - dibayar
-        if (debt > 0) {
+        let newPaid = dibayar
+        
+        if (remaining > 0 && debt > 0) {
           const pay = Math.min(remaining, debt)
-          const newPaid = dibayar + pay
+          newPaid = dibayar + pay
+          remaining -= pay
+        }
+
+        const newStatus = isFullyPaid ? 'Lunas' : (newPaid >= totalJual ? 'Lunas' : (newPaid > 0 ? 'DP / Belum Lunas' : it.status_pesanan))
+        
+        if (newPaid !== dibayar || it.status_pesanan !== newStatus) {
           await onUpdate(it.id, {
             uang_dibayarkan: newPaid,
-            status_pesanan: newPaid >= totalJual ? 'Lunas' : 'DP / Belum Lunas'
+            status_pesanan: newStatus
           })
-          remaining -= pay
         }
       }
       setAddPay('')
