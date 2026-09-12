@@ -139,16 +139,11 @@ export async function redirectToCheckout(planKey, isYearly = false) {
       throw new Error(error.message || 'Gagal memanggil fungsi checkout')
     }
 
-    if (data && data.sessionId) {
-      // Redirect ke Stripe Checkout menggunakan Session ID
-      const { error: stripeError } = await stripe.redirectToCheckout({
-        sessionId: data.sessionId,
-      })
-      if (stripeError) {
-        throw new Error(stripeError.message)
-      }
+    if (data && data.url) {
+      // Redirect langsung menggunakan URL Checkout dari Stripe
+      window.location.href = data.url
     } else {
-      throw new Error('Tidak mendapatkan Session ID dari backend')
+      throw new Error('Tidak mendapatkan URL Checkout dari backend')
     }
 
   } catch (err) {
