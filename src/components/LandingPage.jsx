@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PRICING_PLANS, formatPrice, redirectToCheckout } from '../lib/stripe'
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 // ─── Scroll Reveal Hook ───────────────────────────────────────────
 function useReveal() {
@@ -158,15 +159,11 @@ function Hero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Badge */}
-          <div className="animate-fade-in-up inline-flex items-center gap-2 px-4 py-1.5 bg-brand-50 border border-brand-100 rounded-full mb-8">
-            <span className="w-2 h-2 bg-brand-500 rounded-full animate-pulse" />
-            <span className="text-xs font-bold text-brand-700 uppercase tracking-wider">Platform #1 untuk Toko Pakaian</span>
-          </div>
+
 
           {/* Headline */}
           <h1 className="animate-fade-in-up text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-            Kelola Toko Pakaian
+            Kelola Bisnis Anda Dengan
             <br />
             <span className="text-gradient">Lebih Cerdas & Efisien</span>
           </h1>
@@ -200,11 +197,11 @@ function Hero() {
           <div className="animate-fade-in-up-delay-2 flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-14 text-sm text-gray-400 font-semibold">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🏪</span>
-              <span><strong className="text-gray-700">500+</strong> Toko Terdaftar</span>
+              <span><strong className="text-gray-700">50+</strong> Toko Terdaftar</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">📦</span>
-              <span><strong className="text-gray-700">50K+</strong> Transaksi/Bulan</span>
+              <span><strong className="text-gray-700">15K+</strong> Transaksi/Bulan</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">⚡</span>
@@ -235,10 +232,10 @@ function Hero() {
               <div className="p-4 sm:p-8 bg-gradient-to-br from-gray-50 to-white min-h-[250px] sm:min-h-[400px]">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
                   {[
-                    { label: 'Total Transaksi', value: '1,247', color: 'text-gray-800' },
-                    { label: 'Pendapatan', value: 'Rp 45.2jt', color: 'text-brand-600' },
-                    { label: 'Pengeluaran', value: 'Rp 12.8jt', color: 'text-red-500' },
-                    { label: 'Laba Bersih', value: 'Rp 32.4jt', color: 'text-brand-700' },
+                    { label: 'Total Transaksi', value: '345', color: 'text-gray-800' },
+                    { label: 'Pendapatan', value: 'Rp 62.4jt', color: 'text-brand-600' },
+                    { label: 'Pengeluaran', value: 'Rp 41.5jt', color: 'text-red-500' },
+                    { label: 'Laba Bersih', value: 'Rp 20.9jt', color: 'text-brand-700' },
                   ].map(card => (
                     <div key={card.label} className="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
                       <p className="text-[10px] sm:text-xs text-gray-400 mb-1">{card.label}</p>
@@ -249,18 +246,26 @@ function Hero() {
                 {/* Mock chart bars */}
                 <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 shadow-sm">
                   <p className="text-xs text-gray-400 mb-4 font-semibold">Rekap Penjualan Mingguan</p>
-                  <div className="flex items-end gap-2 sm:gap-3 h-24 sm:h-32">
-                    {[40, 65, 55, 80, 70, 90, 75].map((h, i) => (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                        <div
-                          className="w-full bg-gradient-to-t from-brand-500 to-brand-300 rounded-t-lg transition-all"
-                          style={{ height: `${h}%` }}
+                  <div className="h-32 sm:h-40 pt-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[
+                        { name: 'Sen', Penjualan: 1.5 },
+                        { name: 'Sel', Penjualan: 1.8 },
+                        { name: 'Rab', Penjualan: 1.6 },
+                        { name: 'Kam', Penjualan: 2.1 },
+                        { name: 'Jum', Penjualan: 2.5 },
+                        { name: 'Sab', Penjualan: 3.5 },
+                        { name: 'Min', Penjualan: 2.6 },
+                      ]} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                        <Tooltip 
+                          cursor={{ fill: '#f3f4f6' }}
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
+                          formatter={(value) => [`Rp ${value}jt`, 'Penjualan']}
                         />
-                        <span className="text-[8px] sm:text-[10px] text-gray-400 font-medium">
-                          {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'][i]}
-                        </span>
-                      </div>
-                    ))}
+                        <Bar dataKey="Penjualan" fill="#16a34a" radius={[4,4,0,0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
