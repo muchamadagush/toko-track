@@ -43,7 +43,7 @@ const Receipt = forwardRef(({ transaction, storeName }, ref) => {
    </div>
 
    <div className="flex-1 min-w-0">
-    <h1 className="text-3xl font-black text-black leading-tight break-words">{storeName ? storeName.toUpperCase() : 'TOKO ANDA'}</h1>
+    <h1 className="text-3xl font-black text-black leading-tight break-words">{storeName ? storeName.toUpperCase() : 'BISNIS ANDA'}</h1>
     <p className="text-[14px] font-bold tracking-widest text-gray-800 border-b border-gray-800 pb-1 mb-2 break-words whitespace-normal">
     SABLON SATUAN - LUSINAN - BORDIR KOMPUTER
     </p>
@@ -56,7 +56,7 @@ const Receipt = forwardRef(({ transaction, storeName }, ref) => {
      <p>Ngunut Tulungagung</p>
      </div>
     </div>
-    <p>G.Maps: {storeName || 'Toko Anda'}</p>
+    <p>G.Maps: {storeName || 'Bisnis Anda'}</p>
     <p>HP / WA: 081336027807 / 081330349577</p>
     </div>
    </div>
@@ -155,7 +155,7 @@ const Receipt = forwardRef(({ transaction, storeName }, ref) => {
 
   {/* Bottom tagline */}
   <div className="absolute bottom-4 left-0 right-0 text-center text-[9px] text-gray-300 font-mono tracking-widest uppercase">
-   Toko Track - Digital Invoice System
+   Bisnis Track - Digital Invoice System
   </div>
   </div>
  </div>

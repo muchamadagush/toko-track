@@ -180,7 +180,7 @@ function AppDashboard() {
 
  if (profile?.role === 'owner') {
   navItems.push({ id: 'kategori', label: 'Kelola Kategori', icon: '🏷️' })
-  navItems.push({ id: 'manajemen', label: 'Manajemen Toko', icon: '🏪' })
+  navItems.push({ id: 'manajemen', label: 'Manajemen Bisnis', icon: '🏪' })
  }
  }
 

@@ -21,7 +21,7 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
  if (!useSupabase) {
   // Mock mode for local fallback
   if (mode === 'login') {
-  if (email === 'admin@toko.com' && password === 'admin123') {
+  if (email === 'admin@bisnis.com' && password === 'admin123') {
    onAuthSuccess(
    { id: 'mock-admin', email },
    { role: 'superadmin' }
@@ -29,14 +29,14 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
   } else if (email && password) {
    onAuthSuccess(
    { id: 'mock-owner', email },
-   { role: 'owner', store_id: 'mock-store-id', branch_id: 'branch-1', stores: { name: 'Toko Baju Lokal' }, branches: { name: 'Cabang Utama' } }
+   { role: 'owner', store_id: 'mock-store-id', branch_id: 'branch-1', stores: { name: 'Bisnis Baju Lokal' }, branches: { name: 'Cabang Utama' } }
    )
   } else {
    setError('Email dan password harus diisi')
   }
   } else if (mode === 'register') {
   if (!storeName.trim() || !branchName.trim()) {
-   setError('Nama Toko dan Cabang Utama harus diisi.')
+   setError('Nama Bisnis dan Cabang Utama harus diisi.')
    setLoading(false)
    return
   }
@@ -68,7 +68,7 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
   onAuthSuccess(data.user, profile)
   } else if (mode === 'register') {
   if (!storeName.trim() || !branchName.trim()) {
-   throw new Error('Nama Toko dan Cabang Utama harus diisi.')
+   throw new Error('Nama Bisnis dan Cabang Utama harus diisi.')
   }
 
   const { data, error: err } = await signUp(email, password)
@@ -113,7 +113,7 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
    }])
    if (profileErr) throw profileErr
 
-   setMessage('Registrasi toko dan akun berhasil! Anda telah masuk secara otomatis.')
+   setMessage('Registrasi bisnis dan akun berhasil! Anda telah masuk secara otomatis.')
    onAuthSuccess(user, {
    id: user.id,
    store_id: store.id,
@@ -149,7 +149,7 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
    </div>
    <h2 className="text-2xl font-bold text-gray-900">TokoTrack</h2>
    <p className="text-sm text-gray-400 mt-1">
-    {mode === 'login' && 'Masuk ke akun toko Anda'}
+    {mode === 'login' && 'Masuk ke akun bisnis Anda'}
     {mode === 'register' && 'Buat akun baru'}
     {mode === 'forgot' && 'Reset sandi akun Anda'}
    </p>
@@ -198,13 +198,13 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
     <>
     <hr className="border-gray-100 my-4" />
     <div>
-     <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Nama Toko</label>
+     <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Nama Bisnis</label>
      <input
      type="text"
      required
      value={storeName}
      onChange={(e) => setStoreName(e.target.value)}
-     placeholder="e.g. Toko Baju Utama"
+     placeholder="e.g. Bisnis Baju Utama"
      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all text-gray-800"
      />
     </div>
@@ -244,7 +244,7 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
     ) : (
     <>
      {mode === 'login' && 'Masuk'}
-     {mode === 'register' && 'Daftar Toko & Akun'}
+     {mode === 'register' && 'Daftar Bisnis & Akun'}
      {mode === 'forgot' && 'Kirim Link Reset'}
     </>
     )}
@@ -289,7 +289,7 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
 
    {!useSupabase && (
    <div className="mt-6 p-3 bg-amber-50 border border-amber-100 rounded-2xl text-[10px] text-amber-700 leading-normal">
-    💡 <strong>Simulasi Mode Lokal:</strong> Gunakan email bebas untuk mendaftar/masuk. Untuk masuk sebagai <strong>Superadmin</strong>, gunakan <code>admin@toko.com</code> dan password <code>admin123</code>.
+    💡 <strong>Simulasi Mode Lokal:</strong> Gunakan email bebas untuk mendaftar/masuk. Untuk masuk sebagai <strong>Superadmin</strong>, gunakan <code>admin@bisnis.com</code> dan password <code>admin123</code>.
    </div>
    )}
   </div>

@@ -56,7 +56,7 @@ export default function CatatPengeluaran({ onAdd }) {
   <div>
    <label className="block text-xs font-medium text-gray-500 mb-1">Keterangan *</label>
    <textarea className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent min-h-[100px]"
-   placeholder="Contoh: Bayar listrik, Sewa toko, Plastik packing" 
+   placeholder="Contoh: Bayar listrik, Sewa bisnis, Plastik packing" 
    value={form.keterangan} onChange={e => set('keterangan', e.target.value)} required />
   </div>
 

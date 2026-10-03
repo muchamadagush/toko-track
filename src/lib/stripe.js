@@ -16,7 +16,7 @@ export const PRICING_PLANS = {
   starter: {
     id: 'starter',
     name: 'Starter',
-    description: 'Untuk toko kecil yang baru memulai digitalisasi',
+    description: 'Untuk bisnis kecil yang baru memulai digitalisasi',
     monthlyPrice: 49000,
     yearlyPrice: 470400, // 20% diskon
     features: [
@@ -36,7 +36,7 @@ export const PRICING_PLANS = {
   pro: {
     id: 'pro',
     name: 'Pro',
-    description: 'Untuk toko berkembang dengan banyak cabang',
+    description: 'Untuk bisnis berkembang dengan banyak cabang',
     monthlyPrice: 149000,
     yearlyPrice: 1430400, // 20% diskon
     features: [

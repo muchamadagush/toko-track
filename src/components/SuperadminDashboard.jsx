@@ -114,7 +114,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
  }
 
  const handleUpdateStoreStatus = async (storeId, newStatus) => {
- if (!window.confirm(`Yakin ingin mengubah status toko ini menjadi ${newStatus}?`)) return
+ if (!window.confirm(`Yakin ingin mengubah status bisnis ini menjadi ${newStatus}?`)) return
  
  if (!useSupabase) {
   alert('Mode lokal: Aksi disimulasikan')
@@ -136,7 +136,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
 
  const navItems = [
  { id: 'payments', label: 'Pembayaran', icon: '💳', badge: payments.filter(p => p.status === 'pending').length },
- { id: 'stores', label: 'Toko & Pelanggan', icon: '🏪' },
+ { id: 'stores', label: 'Bisnis & Pelanggan', icon: '🏪' },
  ]
 
  return (
@@ -220,7 +220,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
    </button>
    <div>
     <h1 className="text-lg md:text-xl font-bold text-gray-900">
-    {activeTab === 'payments' ? 'Konfirmasi Pembayaran' : 'Manajemen Toko & Pelanggan'}
+    {activeTab === 'payments' ? 'Konfirmasi Pembayaran' : 'Manajemen Bisnis & Pelanggan'}
     </h1>
     <p className="text-xs text-gray-400 mt-0.5">
     {activeTab === 'payments' ? 'Tinjau dan verifikasi pembayaran masuk' : 'Pantau aktivitas langganan pengguna'}
@@ -271,7 +271,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
         </div>
         <div>
         <div className="flex items-center gap-2 mb-1">
-         <h3 className="font-bold text-gray-900 text-base">{pay.stores?.name || 'Toko Tidak Diketahui'}</h3>
+         <h3 className="font-bold text-gray-900 text-base">{pay.stores?.name || 'Bisnis Tidak Diketahui'}</h3>
          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${pay.status === 'pending' ? 'bg-amber-100 text-amber-700' : pay.status === 'approved' ? 'bg-brand-pale-green text-brand-dark-green' : 'bg-red-100 text-red-700'}`}>
          {pay.status}
          </span>
@@ -298,14 +298,14 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
      </div>
     )}
 
-    {/* Toko Tab */}
+    {/* Bisnis Tab */}
     {activeTab === 'stores' && (
      <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
      <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
       <thead>
        <tr className="bg-gray-50 border-b border-gray-100">
-       <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Toko</th>
+       <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Bisnis</th>
        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Kontak</th>
        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Cabang</th>
        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal Daftar</th>
@@ -362,7 +362,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
        {stores.length === 0 && (
        <tr>
         <td colSpan="6" className="px-6 py-12 text-center text-gray-400 text-sm">
-        Belum ada toko yang terdaftar.
+        Belum ada bisnis yang terdaftar.
         </td>
        </tr>
        )}

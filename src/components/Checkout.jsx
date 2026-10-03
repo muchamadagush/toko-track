@@ -105,7 +105,7 @@ export default function Checkout() {
    </button>
    
    <h2 className="text-3xl font-bold mb-2">Ringkasan Pesanan</h2>
-   <p className="text-brand-pale-green mb-8">Anda selangkah lagi untuk mendigitalisasi toko Anda.</p>
+   <p className="text-brand-pale-green mb-8">Anda selangkah lagi untuk mendigitalisasi bisnis Anda.</p>
    
    <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 mb-6">
    <div className="flex justify-between items-start mb-4">
@@ -142,14 +142,14 @@ export default function Checkout() {
   {/* Right Panel - Form */}
   <div className="p-8 md:p-12 md:w-7/12 flex items-center justify-center">
   <div className="max-w-md w-full">
-   <h2 className="text-2xl font-bold text-gray-900 mb-2">Buat Akun Toko</h2>
-   <p className="text-gray-500 mb-8 text-sm">Isi data di bawah ini untuk membuat toko Anda. Pembayaran dilakukan di langkah selanjutnya.</p>
+   <h2 className="text-2xl font-bold text-gray-900 mb-2">Buat Akun Bisnis</h2>
+   <p className="text-gray-500 mb-8 text-sm">Isi data di bawah ini untuk membuat bisnis Anda. Pembayaran dilakukan di langkah selanjutnya.</p>
    
    <form onSubmit={handleCheckout} className="space-y-5">
    <div className="grid grid-cols-2 gap-4">
     <div>
-    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Toko</label>
-    <input required type="text" name="namaToko" value={formData.namaToko} onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-green transition-shadow" placeholder="Contoh: Toko Maju" />
+    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Bisnis</label>
+    <input required type="text" name="namaToko" value={formData.namaToko} onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-green transition-shadow" placeholder="Contoh: Bisnis Maju" />
     </div>
     <div>
     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Cabang</label>

@@ -70,8 +70,8 @@ export default function ManajemenToko({ profile, useSupabase }) {
   setStaffList(JSON.parse(local))
   } else {
   const initial = [
-   { id: 'staff-1', email: 'budi@toko.com', role: 'cashier', branch_id: 'branch-1' },
-   { id: 'staff-2', email: 'siti@toko.com', role: 'manager', branch_id: 'branch-2' }
+   { id: 'staff-1', email: 'budi@bisnis.com', role: 'cashier', branch_id: 'branch-1' },
+   { id: 'staff-2', email: 'siti@bisnis.com', role: 'manager', branch_id: 'branch-2' }
   ]
   localStorage.setItem('toko_mock_staff', JSON.stringify(initial))
   setStaffList(initial)
@@ -274,8 +274,8 @@ export default function ManajemenToko({ profile, useSupabase }) {
   {/* Title & Copy Store ID */}
   <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-4">
   <div>
-   <h1 className="text-xl font-bold text-gray-900">Manajemen Toko</h1>
-   <p className="text-sm text-gray-400">Atur cabang toko dan hak akses pengguna/staff</p>
+   <h1 className="text-xl font-bold text-gray-900">Manajemen Bisnis</h1>
+   <p className="text-sm text-gray-400">Atur cabang bisnis dan hak akses pengguna/staff</p>
   </div>
   </div>
 
@@ -455,7 +455,7 @@ export default function ManajemenToko({ profile, useSupabase }) {
      required
      value={staffEmail}
      onChange={(e) => setStaffEmail(e.target.value)}
-     placeholder="staff@toko.com"
+     placeholder="staff@bisnis.com"
      className="w-full px-4 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-green text-gray-800 focus:bg-white"
     />
     </div>

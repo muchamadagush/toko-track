@@ -68,7 +68,7 @@ export function Navbar({ minimal = false }) {
     <span className="text-white text-sm font-bold">T</span>
    </div>
    <span className="font-bold text-lg text-gray-900">
-    Toko<span className="text-brand-green">Track</span>
+    Bisnis<span className="text-brand-green">Track</span>
    </span>
    </a>
 
@@ -201,7 +201,7 @@ function Hero() {
    <div className="animate-fade-in-up-delay-2 flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-14 text-sm text-gray-400 font-semibold">
    <div className="flex items-center gap-2">
     <span className="text-2xl">🏪</span>
-    <span><strong className="text-gray-700">50+</strong> Toko Terdaftar</span>
+    <span><strong className="text-gray-700">50+</strong> Bisnis Terdaftar</span>
    </div>
    <div className="flex items-center gap-2">
     <span className="text-2xl">📦</span>
@@ -340,7 +340,7 @@ function Features() {
    <span className="text-brand-dark-green">Satu Platform</span>
    </h2>
    <p className="text-gray-500 mt-4 max-w-2xl mx-auto text-lg">
-   Dirancang khusus untuk pemilik toko pakaian yang ingin mengelola bisnis secara digital tanpa ribet.
+   Dirancang khusus untuk pemilik bisnis pakaian yang ingin mengelola bisnis secara digital tanpa ribet.
    </p>
   </RevealSection>
 
@@ -519,14 +519,14 @@ function Testimonials() {
   store: 'AF Fashion, Jakarta',
   avatar: '👨‍💼',
   rating: 5,
-  quote: 'Fitur multi-cabang sangat membantu. Saya bisa monitor 3 toko sekaligus dari HP. Laporan otomatis setiap minggu membuat saya lebih fokus jualan.',
+  quote: 'Fitur multi-cabang sangat membantu. Saya bisa monitor 3 bisnis sekaligus dari HP. Laporan otomatis setiap minggu membuat saya lebih fokus jualan.',
  },
  {
   name: 'Siti Nurhaliza',
   store: 'Hijab Corner, Surabaya',
   avatar: '👩‍🦰',
   rating: 5,
-  quote: 'Dulu pakai buku tulis, sekarang semua digital dan aman. Fitur DP/cicilan sangat cocok untuk toko saya yang banyak pelanggan bayar bertahap.',
+  quote: 'Dulu pakai buku tulis, sekarang semua digital dan aman. Fitur DP/cicilan sangat cocok untuk bisnis saya yang banyak pelanggan bayar bertahap.',
  },
  ]
 
@@ -539,7 +539,7 @@ function Testimonials() {
    </span>
    <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
    Dipercaya Ratusan{' '}
-   <span className="text-brand-dark-green">Pemilik Toko</span>
+   <span className="text-brand-dark-green">Pemilik Bisnis</span>
    </h2>
    <p className="text-gray-500 mt-4 max-w-2xl mx-auto text-lg">
    Dengarkan langsung dari mereka yang sudah merasakan manfaatnya.
@@ -682,7 +682,7 @@ function CTASection() {
     Bisnis Tokomu?
     </h2>
     <p className="text-brand-pale-green mt-4 text-lg max-w-xl mx-auto">
-    Bergabung dengan 500+ pemilik toko pakaian yang sudah mendigitalisasi bisnis mereka bersama TokoTrack.
+    Bergabung dengan 500+ pemilik bisnis pakaian yang sudah mendigitalisasi bisnis mereka bersama TokoTrack.
     </p>
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
     <button
@@ -748,11 +748,11 @@ function Footer() {
     <span className="text-white text-sm font-bold">T</span>
     </div>
     <span className="font-bold text-lg text-white">
-    Toko<span className="text-brand-light-green">Track</span>
+    Bisnis<span className="text-brand-light-green">Track</span>
     </span>
    </div>
    <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
-    Platform pencatatan dan manajemen toko pakaian terlengkap di Indonesia. Kelola bisnis lebih cerdas.
+    Platform pencatatan dan manajemen bisnis pakaian terlengkap di Indonesia. Kelola bisnis lebih cerdas.
    </p>
 
 
