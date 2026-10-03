@@ -147,7 +147,7 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
    <div className="w-12 h-12 bg-brand-green rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md shadow-green-100">
     <span className="text-white text-xl font-bold">T</span>
    </div>
-   <h2 className="text-2xl font-bold text-gray-900">TS Clothing</h2>
+   <h2 className="text-2xl font-bold text-gray-900">TokoTrack</h2>
    <p className="text-sm text-gray-400 mt-1">
     {mode === 'login' && 'Masuk ke akun toko Anda'}
     {mode === 'register' && 'Buat akun baru'}

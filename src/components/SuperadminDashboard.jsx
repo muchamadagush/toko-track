@@ -17,7 +17,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
  if (!useSupabase) {
   // Mock data for local simulation
   setStores([
-  { id: 'store-1', name: 'TS Clothing Pusat', address: 'Jl. Sudirman No. 12', phone: '08123456789', created_at: new Date().toISOString(), subscription_status: 'trialing' },
+  { id: 'store-1', name: 'TokoTrack Pusat', address: 'Jl. Sudirman No. 12', phone: '08123456789', created_at: new Date().toISOString(), subscription_status: 'trialing' },
   { id: 'store-2', name: 'Zaria Hijab', address: 'Jl. Diponegoro No. 45', phone: '08765432100', created_at: new Date().toISOString(), subscription_status: 'active' }
   ])
   setBranches([
@@ -25,7 +25,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
   { id: 'branch-2', store_id: 'store-1', name: 'Cabang Jakarta' }
   ])
   setPayments([
-  { id: 'pay-1', store_id: 'store-1', bank_pengirim: 'BCA', nama_pengirim: 'Budi Santoso', jumlah: 149000, tanggal_transfer: '2026-10-02', status: 'pending', stores: { name: 'TS Clothing Pusat' } }
+  { id: 'pay-1', store_id: 'store-1', bank_pengirim: 'BCA', nama_pengirim: 'Budi Santoso', jumlah: 149000, tanggal_transfer: '2026-10-02', status: 'pending', stores: { name: 'TokoTrack Pusat' } }
   ])
   setLoading(false)
   return

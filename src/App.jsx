@@ -249,7 +249,7 @@ function AppDashboard() {
    </div>
    <div className="min-w-0">
    <span className="font-bold text-gray-900 text-sm block leading-tight truncate">
-    {profile?.stores?.name || 'TS Clothing'}
+    {profile?.stores?.name || 'TokoTrack'}
    </span>
    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mt-0.5">
     Role: {profile?.role || 'Owner'}
@@ -349,7 +349,7 @@ function AppDashboard() {
    </button>
    <div className="min-w-0">
     <span className="font-bold text-gray-900 text-sm block leading-tight truncate">
-    {profile?.stores?.name || 'TS Clothing'}
+    {profile?.stores?.name || 'TokoTrack'}
     </span>
     <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider block">
     {selectedBranchId === 'all' ? '🌐 Semua Cabang' : `📍 ${storeBranches.find(b => b.id === selectedBranchId)?.name || 'Cabang'}`}
