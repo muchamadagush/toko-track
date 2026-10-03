@@ -240,7 +240,7 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
                       <span>📅 {g.tanggal}</span>
                       {g.nama_pembeli && <span>👤 {g.nama_pembeli}</span>}
-                      {g.deadline && <span>⏰ Deadline: {deadlineBadge(g.deadline)}</span>}
+                      {g.deadline && g.status_pesanan !== 'Lunas' && <span>⏰ Deadline: {deadlineBadge(g.deadline)}</span>}
                       <span>{g.kategori}</span>
                     </div>
                   </div>
