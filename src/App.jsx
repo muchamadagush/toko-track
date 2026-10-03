@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import LandingPage from './components/LandingPage'
 import Checkout from './components/Checkout'
 import CatatBarang from './components/CatatBarang'
@@ -21,6 +21,7 @@ import { supabase, signOut } from './lib/supabase'
 
 // ─── App Dashboard (existing app logic) ───────────────────────────
 function AppDashboard() {
+ const navigate = useNavigate()
  const [tab, setTab] = useState('catat')
  const [user, setUser] = useState(null)
  const [profile, setProfile] = useState(null)
@@ -124,6 +125,7 @@ function AppDashboard() {
  }
  setUser(null)
  setProfile(null)
+ navigate('/')
  }
 
  // Load hooks with profile and branch context
