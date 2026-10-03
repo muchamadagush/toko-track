@@ -155,7 +155,7 @@ const Receipt = forwardRef(({ transaction, storeName }, ref) => {
 
   {/* Bottom tagline */}
   <div className="absolute bottom-4 left-0 right-0 text-center text-[9px] text-gray-300 font-mono tracking-widest uppercase">
-   Bisnis Track - Digital Invoice System
+   Toko Track - Digital Invoice System
   </div>
   </div>
  </div>

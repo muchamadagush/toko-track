@@ -68,7 +68,7 @@ export function Navbar({ minimal = false }) {
     <span className="text-white text-sm font-bold">T</span>
    </div>
    <span className="font-bold text-lg text-gray-900">
-    Bisnis<span className="text-brand-green">Track</span>
+    Toko<span className="text-brand-green">Track</span>
    </span>
    </a>
 
@@ -340,7 +340,7 @@ function Features() {
    <span className="text-brand-dark-green">Satu Platform</span>
    </h2>
    <p className="text-gray-500 mt-4 max-w-2xl mx-auto text-lg">
-   Dirancang khusus untuk pemilik bisnis pakaian yang ingin mengelola bisnis secara digital tanpa ribet.
+   Dirancang khusus untuk pemilik bisnis yang ingin mengelola bisnis secara digital tanpa ribet.
    </p>
   </RevealSection>
 
@@ -679,10 +679,10 @@ function CTASection() {
     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
     Siap Mengembangkan
     <br />
-    Bisnis Tokomu?
+    Bisnismu?
     </h2>
     <p className="text-brand-pale-green mt-4 text-lg max-w-xl mx-auto">
-    Bergabung dengan 500+ pemilik bisnis pakaian yang sudah mendigitalisasi bisnis mereka bersama TokoTrack.
+    Bergabung dengan 500+ pemilik bisnis yang sudah mendigitalisasi bisnis mereka bersama TokoTrack.
     </p>
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
     <button
@@ -748,11 +748,11 @@ function Footer() {
     <span className="text-white text-sm font-bold">T</span>
     </div>
     <span className="font-bold text-lg text-white">
-    Bisnis<span className="text-brand-light-green">Track</span>
+    Toko<span className="text-brand-light-green">Track</span>
     </span>
    </div>
    <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
-    Platform pencatatan dan manajemen bisnis pakaian terlengkap di Indonesia. Kelola bisnis lebih cerdas.
+    Platform pencatatan dan manajemen bisnis terlengkap di Indonesia. Kelola bisnis lebih cerdas.
    </p>
 
 
