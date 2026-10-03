@@ -199,8 +199,11 @@ CREATE POLICY "Allow write transactions" ON public.transactions FOR ALL TO authe
     OR branch_id = (SELECT branch_id FROM public.profiles WHERE id = auth.uid())
   )
 ) WITH CHECK (
-  (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'owner'
-  OR (kategori = 'Lainnya' AND modal = 0 AND modal_lain_nominal = 0 AND (modal_lain IS NULL OR modal_lain = ''))
+  store_id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+  AND (
+    (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('owner', 'manager')
+    OR branch_id = (SELECT branch_id FROM public.profiles WHERE id = auth.uid())
+  )
 );
 
 -- 7. Buat Policies untuk tabel expenses

@@ -93,6 +93,10 @@ export default function Auth({ onAuthSuccess, useSupabase }) {
             .single()
           if (storeErr) throw storeErr
 
+          if (!store || !store.id) {
+            throw new Error(`Gagal mendapatkan ID Toko setelah pembuatan. Data yang dikembalikan: ${JSON.stringify(store)}`)
+          }
+
           // 2. Create Branch
           const { data: branch, error: branchErr } = await supabase
             .from('branches')
