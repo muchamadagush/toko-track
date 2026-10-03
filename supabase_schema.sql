@@ -5,11 +5,27 @@
 
 -- Buat tabel stores (Toko)
 CREATE TABLE IF NOT EXISTS public.stores (
-  id          uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        text         NOT NULL,
-  address     text,
-  phone       text,
-  created_at  timestamptz  NOT NULL DEFAULT now()
+  id                  uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
+  name                text         NOT NULL,
+  address             text,
+  phone               text,
+  trial_ends_at       timestamptz  DEFAULT (now() + interval '7 days'),
+  subscription_ends_at timestamptz,
+  subscription_status text         NOT NULL DEFAULT 'trialing',
+  created_at          timestamptz  NOT NULL DEFAULT now()
+);
+
+-- Buat tabel payment_confirmations (Konfirmasi Pembayaran Manual)
+CREATE TABLE IF NOT EXISTS public.payment_confirmations (
+  id             uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id       uuid         NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
+  bank_pengirim  text         NOT NULL,
+  nama_pengirim  text         NOT NULL,
+  jumlah         numeric      NOT NULL,
+  tanggal_transfer date       NOT NULL,
+  bukti_transfer text,        -- URL gambar jika diupload
+  status         text         NOT NULL DEFAULT 'pending', -- pending, approved, rejected
+  created_at     timestamptz  NOT NULL DEFAULT now()
 );
 
 -- Buat tabel branches (Cabang)
@@ -141,7 +157,25 @@ CREATE POLICY "Allow select stores" ON public.stores FOR SELECT TO authenticated
 CREATE POLICY "Allow insert stores" ON public.stores FOR INSERT TO authenticated WITH CHECK (true);
 CREATE POLICY "Allow update stores" ON public.stores FOR UPDATE TO authenticated USING (
   id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+  OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'superadmin'
 );
+
+-- 2.1 Policies untuk payment_confirmations
+DROP POLICY IF EXISTS "Allow select payment_confirmations" ON public.payment_confirmations;
+DROP POLICY IF EXISTS "Allow insert payment_confirmations" ON public.payment_confirmations;
+
+CREATE POLICY "Allow select payment_confirmations" ON public.payment_confirmations FOR SELECT TO authenticated USING (
+  store_id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+  OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'superadmin'
+);
+CREATE POLICY "Allow insert payment_confirmations" ON public.payment_confirmations FOR INSERT TO authenticated WITH CHECK (
+  store_id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+);
+DROP POLICY IF EXISTS "Allow update payment_confirmations" ON public.payment_confirmations;
+CREATE POLICY "Allow update payment_confirmations" ON public.payment_confirmations FOR UPDATE TO authenticated USING (
+  (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'superadmin'
+);
+ALTER TABLE public.payment_confirmations ENABLE ROW LEVEL SECURITY;
 
 
 -- 3. Policies untuk branches
@@ -295,4 +329,27 @@ EXECUTE FUNCTION populate_transaction_modal();
 -- ALTER TABLE public.expenses ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE SET NULL;
 -- ALTER TABLE public.expenses ADD COLUMN IF NOT EXISTS branch_id uuid REFERENCES public.branches(id) ON DELETE SET NULL;
 -- ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE SET NULL;
+
+-- Buat tabel progress_steps
+CREATE TABLE IF NOT EXISTS public.progress_steps (
+  id                  uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id            uuid         REFERENCES public.stores(id) ON DELETE CASCADE,
+  name                text         NOT NULL,
+  urutan              integer      NOT NULL,
+  created_at          timestamptz  NOT NULL DEFAULT now(),
+  UNIQUE (store_id, name)
+);
+
+-- Tambahkan kolom current_progress di transactions
+ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS current_progress text;
+
+-- Tambah hak akses (RLS) untuk progress_steps
+ALTER TABLE public.progress_steps ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow select progress_steps" ON public.progress_steps FOR SELECT TO authenticated USING (
+  store_id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+);
+CREATE POLICY "Allow write progress_steps" ON public.progress_steps FOR ALL TO authenticated USING (
+  store_id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+  AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'owner'
+);
 

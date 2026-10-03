@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^9.16.0",
     "@supabase/supabase-js": "^2.39.3",
     "date-fns": "^3.3.1",
     "html-to-image": "^1.11.13",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.18.3",
     "recharts": "^2.12.0"
   },
   "devDependencies": {

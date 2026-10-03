@@ -76,6 +76,7 @@ export function useTransactions(profile, selectedBranchId) {
       modal_lain: item.modal_lain || '',
       modal_lain_nominal: item.modal_lain_nominal || 0,
       uang_dibayarkan: item.uang_dibayarkan || 0,
+      current_progress: item.current_progress || null,
       store_id: profile?.store_id || null,
       branch_id: activeBranchId,
     }
