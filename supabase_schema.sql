@@ -332,3 +332,26 @@ EXECUTE FUNCTION populate_transaction_modal();
 -- ALTER TABLE public.expenses ADD COLUMN IF NOT EXISTS branch_id uuid REFERENCES public.branches(id) ON DELETE SET NULL;
 -- ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE SET NULL;
 
+-- Buat tabel progress_steps
+CREATE TABLE IF NOT EXISTS public.progress_steps (
+  id                  uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id            uuid         REFERENCES public.stores(id) ON DELETE CASCADE,
+  name                text         NOT NULL,
+  urutan              integer      NOT NULL,
+  created_at          timestamptz  NOT NULL DEFAULT now(),
+  UNIQUE (store_id, name)
+);
+
+-- Tambahkan kolom current_progress di transactions
+ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS current_progress text;
+
+-- Tambah hak akses (RLS) untuk progress_steps
+ALTER TABLE public.progress_steps ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow select progress_steps" ON public.progress_steps FOR SELECT TO authenticated USING (
+  store_id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+);
+CREATE POLICY "Allow write progress_steps" ON public.progress_steps FOR ALL TO authenticated USING (
+  store_id = (SELECT store_id FROM public.profiles WHERE id = auth.uid())
+  AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'owner'
+);
+

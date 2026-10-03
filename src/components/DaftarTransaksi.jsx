@@ -3,7 +3,7 @@ import { fmt, calcItem, STATUS_PESANAN, STATUS_COLOR } from '../lib/utils'
 import { toPng } from 'html-to-image'
 import Receipt from './Receipt'
 
-export default function DaftarTransaksi({ transactions, categories, onDelete, onUpdate, onDeleteAll, loading, profile }) {
+export default function DaftarTransaksi({ transactions, categories, progressSteps, onDelete, onUpdate, onDeleteAll, loading, profile }) {
  const isOwner = profile?.role === 'owner'
  const [search, setSearch] = useState('')
  const [filterKat, setFilterKat] = useState('Semua')
@@ -242,6 +242,64 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
     {isOpen && (
      <div className="bg-gray-50 border-t border-gray-100 p-4">
      {/* Items List */}
+     
+     {/* Progress Stepper */}
+     {progressSteps && progressSteps.length > 0 && (
+       <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4 shadow-sm overflow-x-auto">
+         <p className="text-xs font-bold text-gray-500 uppercase mb-3">Status Pengerjaan</p>
+         <div className="flex items-center min-w-max">
+           {progressSteps.map((step, index) => {
+             // Find current progress index
+             const currentIdx = progressSteps.findIndex(s => s.name === g.items[0]?.current_progress);
+             // If not set, treat as before first step (-1)
+             
+             let status = 'upcoming'; // default
+             if (g.items[0]?.current_progress === step.name) status = 'current';
+             else if (currentIdx !== -1 && index < currentIdx) status = 'completed';
+
+             return (
+               <div key={step.id} className="flex items-center group">
+                 {/* Step Circle */}
+                 <button
+                   disabled={updating === g.id}
+                   onClick={async () => {
+                     setUpdating(g.id);
+                     try {
+                       for (const it of g.items) {
+                         await onUpdate(it.id, { current_progress: step.name });
+                       }
+                     } catch(e) {
+                       alert(e.message);
+                     }
+                     setUpdating(null);
+                   }}
+                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all border-2 ${
+                     status === 'completed' ? 'border-brand-green bg-brand-pale-green text-brand-dark-green' :
+                     status === 'current' ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm' :
+                     'border-gray-200 bg-gray-50 text-gray-400 hover:border-brand-green'
+                   }`}
+                 >
+                   <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                     status === 'completed' ? 'bg-brand-green text-white' :
+                     status === 'current' ? 'bg-blue-500 text-white' :
+                     'bg-gray-200 text-gray-500'
+                   }`}>
+                     {status === 'completed' ? '✓' : (index + 1)}
+                   </div>
+                   <span className="text-xs font-bold whitespace-nowrap">{step.name}</span>
+                 </button>
+
+                 {/* Connector Line */}
+                 {index < progressSteps.length - 1 && (
+                   <div className={`w-8 h-0.5 mx-2 ${(status === 'completed' || status === 'current') && currentIdx > index ? 'bg-brand-green' : 'bg-gray-200'}`} />
+                 )}
+               </div>
+             );
+           })}
+         </div>
+       </div>
+     )}
+
      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-4">
       <table className="w-full text-left text-xs">
       <thead className="bg-gray-50 text-gray-400 font-semibold border-b border-gray-100">

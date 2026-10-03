@@ -16,6 +16,7 @@ import Settings from './components/Settings'
 import { useTransactions } from './hooks/useTransactions'
 import { useExpenses } from './hooks/useExpenses'
 import { useCategories } from './hooks/useCategories'
+import { useProgressSteps } from './hooks/useProgressSteps'
 import { calcSummary, fmtShort, fmt } from './lib/utils'
 import { supabase, signOut } from './lib/supabase'
 
@@ -133,7 +134,9 @@ function AppDashboard() {
  const { expenses, loading: eLoading, addExpense, deleteExpense, deleteAll: deleteAllExpenses } = useExpenses(profile, selectedBranchId)
  const { categories, loading: cLoading, addCategory, updateCategory, deleteCategory } = useCategories(profile)
 
- const loading = tLoading || eLoading
+ const { steps: progressSteps, addStep, updateStep, deleteStep, reorderSteps, loading: pLoading } = useProgressSteps(profile);
+
+  const loading = tLoading || eLoading
  const error = tError
  const summary = calcSummary(transactions, expenses)
  const isOwner = profile?.role === 'owner'
@@ -190,6 +193,7 @@ function AppDashboard() {
  isGroup: true,
  subItems: [
   { id: 'settings_general', label: 'Umum', icon: '⚙️' },
+   { id: 'settings_progress', label: 'Progress Pengerjaan', icon: '📋' },
   { id: 'settings_billing', label: 'Langganan', icon: '💳' },
   { id: 'settings_history', label: 'Riwayat Transaksi', icon: '📜' }
  ]
@@ -391,7 +395,7 @@ function AppDashboard() {
 
    {/* View Dispatcher */}
    {tab === 'catat' && <CatatBarang onAdd={addTransaction} categories={categories} profile={profile} />}
-   {tab === 'daftar' && <DaftarTransaksi transactions={transactions} categories={categories} onDelete={deleteTransaction} onUpdate={updateTransaction} onDeleteAll={deleteAll} loading={loading} profile={profile} />}
+   {tab === 'daftar' && <DaftarTransaksi transactions={transactions} categories={categories} progressSteps={progressSteps} onDelete={deleteTransaction} onUpdate={updateTransaction} onDeleteAll={deleteAll} loading={loading} profile={profile} />}
    {tab === 'pengeluaran' && (
    <div className="space-y-6">
     <CatatPengeluaran onAdd={addExpense} />
@@ -418,6 +422,18 @@ function AppDashboard() {
     useSupabase={useSupabase} 
     isTrialExpired={isTrialExpired} 
     activeTab={tab}
+    progressSteps={progressSteps}
+    onAddProgress={addStep}
+    onUpdateProgress={updateStep}
+    onDeleteProgress={deleteStep}
+    onReorderProgress={reorderSteps}
+    loadingProgress={pLoading}
+    progressSteps={progressSteps}
+    onAddProgress={addStep}
+    onUpdateProgress={updateStep}
+    onDeleteProgress={deleteStep}
+    onReorderProgress={reorderSteps}
+    loadingProgress={pLoading}
     onCheckStatus={() => {
     setAuthLoading(true)
     if (user) fetchProfile(user.id)

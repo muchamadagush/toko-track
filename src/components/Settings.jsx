@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Paywall from './Paywall'
 
-export default function Settings({ profile, useSupabase, isTrialExpired, activeTab, onCheckStatus }) {
+export default function Settings({ profile, useSupabase, isTrialExpired, activeTab, progressSteps, onAddProgress, onUpdateProgress, onDeleteProgress, onReorderProgress, loadingProgress, onCheckStatus }) {
  const [showPaywallModal, setShowPaywallModal] = useState(false)
  const [isConfirmationPending, setIsConfirmationPending] = useState(false)
  const [paymentHistory, setPaymentHistory] = useState([])
+  const [newProgressName, setNewProgressName] = useState('')
+  const [editingProgress, setEditingProgress] = useState(null)
 
  let savedPlanType = localStorage.getItem('toko_pending_plan_type') || 'Bulanan'
  let savedAmount = localStorage.getItem('toko_pending_amount')
@@ -73,6 +75,138 @@ export default function Settings({ profile, useSupabase, isTrialExpired, activeT
    </div>
   </div>
   )}
+
+  
+  {activeTab === 'settings_progress' && (
+  <div className="space-y-4">
+    <h3 className="text-lg font-bold text-gray-900">Kelola Progress Pengerjaan</h3>
+    <p className="text-sm text-gray-500">
+    Atur langkah-langkah pengerjaan pesanan. Anda bisa menambah, mengubah, dan menghapus tahap progress sesuai dengan alur produksi toko Anda.
+    </p>
+
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="p-4 bg-gray-50 border-b border-gray-200 flex gap-2 items-center">
+        <input 
+          type="text" 
+          placeholder="Nama Progress (Misal: Cetak, Jahit, Packing...)"
+          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-brand-green"
+          value={newProgressName}
+          onChange={e => setNewProgressName(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && newProgressName.trim()) {
+              onAddProgress(newProgressName.trim());
+              setNewProgressName('');
+            }
+          }}
+        />
+        <button 
+          onClick={() => {
+            if(newProgressName.trim()){
+              onAddProgress(newProgressName.trim());
+              setNewProgressName('');
+            }
+          }}
+          className="bg-brand-green text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm"
+        >
+          Tambah
+        </button>
+      </div>
+
+      <div className="p-4">
+        {loadingProgress ? (
+           <p className="text-center text-gray-400 text-sm">Memuat data...</p>
+        ) : progressSteps && progressSteps.length > 0 ? (
+          <ul className="space-y-2">
+            {progressSteps.map((step, index) => (
+              <li key={step.id} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg hover:border-gray-200 shadow-sm">
+                <div className="w-6 h-6 rounded-full bg-gray-100 text-gray-500 font-bold text-xs flex items-center justify-center">
+                  {index + 1}
+                </div>
+                
+                {editingProgress === step.id ? (
+                  <input
+                    autoFocus
+                    type="text"
+                    defaultValue={step.name}
+                    className="flex-1 px-2 py-1 border border-brand-green rounded text-sm outline-none"
+                    onBlur={(e) => {
+                      if (e.target.value.trim() && e.target.value.trim() !== step.name) {
+                        onUpdateProgress(step.id, e.target.value.trim());
+                      }
+                      setEditingProgress(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (e.target.value.trim() && e.target.value.trim() !== step.name) {
+                          onUpdateProgress(step.id, e.target.value.trim());
+                        }
+                        setEditingProgress(null);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="flex-1 text-sm font-bold text-gray-700">{step.name}</div>
+                )}
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      if (index > 0) {
+                        const newArray = [...progressSteps];
+                        const temp = newArray[index];
+                        newArray[index] = newArray[index - 1];
+                        newArray[index - 1] = temp;
+                        onReorderProgress(newArray);
+                      }
+                    }}
+                    disabled={index === 0}
+                    className="p-1.5 text-gray-400 hover:text-brand-green disabled:opacity-30 transition-colors"
+                  >
+                    ⬆️
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (index < progressSteps.length - 1) {
+                        const newArray = [...progressSteps];
+                        const temp = newArray[index];
+                        newArray[index] = newArray[index + 1];
+                        newArray[index + 1] = temp;
+                        onReorderProgress(newArray);
+                      }
+                    }}
+                    disabled={index === progressSteps.length - 1}
+                    className="p-1.5 text-gray-400 hover:text-brand-green disabled:opacity-30 transition-colors"
+                  >
+                    ⬇️
+                  </button>
+                  <button
+                    onClick={() => setEditingProgress(step.id)}
+                    className="p-1.5 text-blue-400 hover:text-blue-600 ml-2"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Yakin ingin menghapus progress ini?')) {
+                        onDeleteProgress(step.id)
+                      }
+                    }}
+                    className="p-1.5 text-red-400 hover:text-red-600"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-center text-gray-400 text-sm">Belum ada progress pengerjaan yang dibuat.</p>
+        )}
+      </div>
+    </div>
+  </div>
+  )}
+
 
   {activeTab === 'settings_billing' && (
   <div className="space-y-4">
