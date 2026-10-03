@@ -269,7 +269,8 @@ SELECT
   CASE 
     WHEN (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'owner' THEN modal_lain_nominal 
     ELSE 0 
-  END AS modal_lain_nominal
+  END AS modal_lain_nominal,
+  current_progress
 FROM public.transactions;
 
 
