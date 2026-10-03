@@ -331,7 +331,7 @@ export default function CatatBarang({ onAdd, categories, profile }) {
   </form>
   {/* Hidden Receipt for Capture */}
   <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
-  {lastSaved && <Receipt ref={receiptRef} transaction={lastSaved} />}
+  {lastSaved && <Receipt ref={receiptRef} transaction={lastSaved} storeName={profile?.stores?.name} />}
   </div>
  </div>
  )

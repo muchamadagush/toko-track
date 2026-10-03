@@ -348,7 +348,7 @@ export default function DaftarTransaksi({ transactions, categories, onDelete, on
   )}
   {/* Hidden Receipt for Capture */}
   <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
-  {receiptData && <Receipt ref={receiptRef} transaction={receiptData} />}
+  {receiptData && <Receipt ref={receiptRef} transaction={receiptData} storeName={profile?.stores?.name} />}
   </div>
  </div>
  )

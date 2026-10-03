@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { fmt } from '../lib/utils';
 
-const Receipt = forwardRef(({ transaction }, ref) => {
+const Receipt = forwardRef(({ transaction, storeName }, ref) => {
  if (!transaction) return null;
 
  const {
@@ -43,7 +43,7 @@ const Receipt = forwardRef(({ transaction }, ref) => {
    </div>
 
    <div className="flex-1 min-w-0">
-    <h1 className="text-3xl font-black text-black leading-tight break-words">TS CLOTHING STORE</h1>
+    <h1 className="text-3xl font-black text-black leading-tight break-words">{storeName ? storeName.toUpperCase() : 'TOKO ANDA'}</h1>
     <p className="text-[14px] font-bold tracking-widest text-gray-800 border-b border-gray-800 pb-1 mb-2 break-words whitespace-normal">
     SABLON SATUAN - LUSINAN - BORDIR KOMPUTER
     </p>
@@ -56,7 +56,7 @@ const Receipt = forwardRef(({ transaction }, ref) => {
      <p>Ngunut Tulungagung</p>
      </div>
     </div>
-    <p>G.Maps: TS Clothing / Custom Your Idea</p>
+    <p>G.Maps: {storeName || 'Toko Anda'}</p>
     <p>HP / WA: 081336027807 / 081330349577</p>
     </div>
    </div>
