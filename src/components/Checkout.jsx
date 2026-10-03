@@ -95,7 +95,7 @@ export default function Checkout() {
   <Navbar minimal={true} />
   <div className="min-h-screen pt-16 md:pt-20 bg-gray-50 flex flex-col md:flex-row">
   {/* Left Panel - Order Summary */}
-  <div className=" text-white p-8 md:p-12 md:w-5/12 flex flex-col justify-center relative overflow-hidden">
+  <div className="bg-brand-dark-green text-white p-8 md:p-12 md:w-5/12 flex flex-col justify-center relative overflow-hidden">
   <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
   <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
   
@@ -105,17 +105,17 @@ export default function Checkout() {
    </button>
    
    <h2 className="text-3xl font-bold mb-2">Ringkasan Pesanan</h2>
-   <p className="text-brand-light-green mb-8">Anda selangkah lagi untuk mendigitalisasi toko Anda.</p>
+   <p className="text-brand-pale-green mb-8">Anda selangkah lagi untuk mendigitalisasi toko Anda.</p>
    
    <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 mb-6">
    <div className="flex justify-between items-start mb-4">
     <div>
     <h3 className="text-xl font-bold">{plan.name}</h3>
-    <p className="text-sm text-brand-light-green">{isYearly ? 'Tagihan Tahunan' : 'Tagihan Bulanan'}</p>
+    <p className="text-sm text-brand-pale-green">{isYearly ? 'Tagihan Tahunan' : 'Tagihan Bulanan'}</p>
     </div>
     <div className="text-right">
     <p className="text-2xl font-bold">{formatPrice(monthlyEquivalent)}</p>
-    <p className="text-xs text-brand-light-green">/ bulan</p>
+    <p className="text-xs text-brand-pale-green">/ bulan</p>
     </div>
    </div>
    
@@ -129,7 +129,7 @@ export default function Checkout() {
    <ul className="space-y-3">
     {plan.features.slice(0, 3).map((feature, i) => (
     <li key={i} className="flex items-start gap-2 text-sm text-brand-pale-green">
-     <span className="text-brand-light-green">✓</span> {feature}
+     <span className="text-brand-pale-green">✓</span> {feature}
     </li>
     ))}
    </ul>
@@ -173,7 +173,7 @@ export default function Checkout() {
     </div>
    )}
    
-   <button disabled={loading} type="submit" className="w-full py-3.5 bg-brand-green hover:bg-brand-dark-green bg-brand-green hover:bg-brand-dark-green text-white font-bold rounded-xl shadow-lg shadow-brand-pale-green transition-all hover:-translate-y-0.5 disabled:opacity-70 flex justify-center items-center gap-2">
+   <button disabled={loading} type="submit" className="w-full py-3.5 bg-brand-green hover:bg-brand-dark-green text-white font-bold rounded-xl shadow-lg shadow-brand-pale-green transition-all hover:-translate-y-0.5 disabled:opacity-70 flex justify-center items-center gap-2">
     {loading ? 'Memproses...' : 'Daftar & Lanjutkan Pembayaran →'}
    </button>
    

@@ -25,12 +25,9 @@ export const PRICING_PLANS = {
       '2 akun staff',
       'Laporan dasar',
       'Dukungan email',
-      'Backup harian',
+
     ],
-    limitations: [
-      'Export PDF saja',
-      'Tanpa API access',
-    ],
+    limitations: [],
     cta: 'Mulai Starter',
     popular: false,
     stripePriceIdMonthly: import.meta.env.VITE_STRIPE_STARTER_MONTHLY_PRICE_ID || null,
@@ -46,9 +43,9 @@ export const PRICING_PLANS = {
       'Transaksi unlimited',
       'Hingga 5 cabang',
       '10 akun staff',
-      'Laporan lengkap + Export',
+      'Laporan lengkap',
       'Dukungan prioritas',
-      'Backup realtime',
+
       'Rekap per kategori',
       'Manajemen DP / cicilan',
     ],
@@ -57,28 +54,6 @@ export const PRICING_PLANS = {
     popular: true,
     stripePriceIdMonthly: import.meta.env.VITE_STRIPE_PRO_MONTHLY_PRICE_ID || null,
     stripePriceIdYearly: import.meta.env.VITE_STRIPE_PRO_YEARLY_PRICE_ID || null,
-  },
-  enterprise: {
-    id: 'enterprise',
-    name: 'Enterprise',
-    description: 'Untuk jaringan toko besar dengan kebutuhan khusus',
-    monthlyPrice: null, // Custom pricing
-    yearlyPrice: null,
-    features: [
-      'Transaksi unlimited',
-      'Cabang unlimited',
-      'Staff unlimited',
-      'Laporan custom + API',
-      'Account manager dedicated',
-      'SLA 99.9%',
-      'Integrasi marketplace',
-      'White-label option',
-    ],
-    limitations: [],
-    cta: 'Hubungi Kami',
-    popular: false,
-    stripePriceIdMonthly: null,
-    stripePriceIdYearly: null,
   },
 }
 
@@ -105,11 +80,7 @@ export async function redirectToCheckout(planKey, isYearly = false) {
     return
   }
 
-  // Enterprise → hubungi via WhatsApp / email
-  if (planKey === 'enterprise') {
-    window.open('mailto:hello@tokotrack.com?subject=Enterprise Plan Inquiry', '_blank')
-    return
-  }
+
 
   const priceId = isYearly ? plan.stripePriceIdYearly : plan.stripePriceIdMonthly
 

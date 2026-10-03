@@ -412,7 +412,7 @@ function Pricing() {
   </RevealSection>
 
   {/* Pricing Cards */}
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
    {plans.map((plan) => {
    const price = isYearly
     ? (plan.yearlyPrice ? Math.round(plan.yearlyPrice / 12) : null)
@@ -604,7 +604,7 @@ function FAQ() {
  },
  {
   q: 'Berapa banyak staff yang bisa saya tambahkan?',
-  a: 'Tergantung paket: Starter (2 staff), Pro (10 staff), Enterprise (unlimited). Setiap staff bisa diatur aksesnya berdasarkan role (owner, manager, kasir).',
+  a: 'Tergantung paket: Starter (2 staff), Pro (10 staff). Setiap staff bisa diatur aksesnya berdasarkan role (owner, manager, kasir).',
  },
  {
   q: 'Apakah bisa digunakan di HP?',
@@ -612,7 +612,7 @@ function FAQ() {
  },
  {
   q: 'Bagaimana cara menghubungi support?',
-  a: 'Starter mendapat dukungan via email. Pro mendapat prioritas support dengan respon < 4 jam. Enterprise mendapat dedicated account manager.',
+  a: 'Starter mendapat dukungan via email. Pro mendapat prioritas support dengan respon < 4 jam.',
  },
  {
   q: 'Apakah bisa cancel subscription kapan saja?',

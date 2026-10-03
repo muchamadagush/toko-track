@@ -134,7 +134,7 @@ export default function Paywall({ profile, useSupabase, onCheckStatus, nominal, 
 
     {message && <div className={`text-xs p-3 rounded-xl ${message.includes('Gagal') ? 'bg-red-50 text-red-600' : 'bg-brand-pale-green text-brand-green'}`}>{message}</div>}
 
-    <button disabled={loading} type="submit" className="w-full py-3.5 bg-brand-green hover:bg-brand-dark-green bg-brand-green hover:bg-brand-dark-green text-white font-bold rounded-xl shadow-lg shadow-brand-light-green transition-all disabled:opacity-50">
+    <button disabled={loading} type="submit" className="w-full py-3.5 bg-brand-green hover:bg-brand-dark-green text-white font-bold rounded-xl shadow-lg shadow-brand-light-green transition-all disabled:opacity-50">
     {loading ? 'Mengirim...' : 'Kirim Konfirmasi'}
     </button>
    </form>
