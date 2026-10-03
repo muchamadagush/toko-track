@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PRICING_PLANS, formatPrice, redirectToCheckout } from '../lib/stripe'
+import { PRICING_PLANS, formatPrice } from '../lib/stripe'
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 // ─── Scroll Reveal Hook ───────────────────────────────────────────
@@ -34,7 +34,7 @@ function RevealSection({ children, className = '' }) {
 }
 
 // ─── NAVBAR ───────────────────────────────────────────────────────
-function Navbar() {
+export function Navbar({ minimal = false }) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
@@ -63,7 +63,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2.5 group">
+          <a href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-md shadow-brand-200 group-hover:shadow-brand-300 transition-shadow">
               <span className="text-white text-sm font-bold">T</span>
             </div>
@@ -72,47 +72,51 @@ function Navbar() {
             </span>
           </a>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            {links.map(link => (
+          {!minimal && (
+            <>
+              {/* Desktop Nav */}
+              <div className="hidden md:flex items-center gap-8">
+                {links.map(link => (
+                  <button
+                    key={link.href}
+                    onClick={() => handleNavClick(link.href)}
+                    className="text-sm font-semibold text-gray-600 hover:text-brand-600 transition-colors"
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Desktop CTA */}
+              <div className="hidden md:flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/app')}
+                  className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-4 py-2"
+                >
+                  Masuk
+                </button>
+                <button
+                  onClick={() => navigate('/app')}
+                  className="text-sm font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 px-5 py-2.5 rounded-xl shadow-md shadow-brand-200 hover:shadow-brand-300 transition-all hover:-translate-y-0.5"
+                >
+                  Coba Gratis
+                </button>
+              </div>
+
+              {/* Mobile hamburger */}
               <button
-                key={link.href}
-                onClick={() => handleNavClick(link.href)}
-                className="text-sm font-semibold text-gray-600 hover:text-brand-600 transition-colors"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-100 text-gray-600"
               >
-                {link.label}
+                {mobileOpen ? '✕' : '☰'}
               </button>
-            ))}
-          </div>
-
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={() => navigate('/app')}
-              className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-4 py-2"
-            >
-              Masuk
-            </button>
-            <button
-              onClick={() => navigate('/app')}
-              className="text-sm font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 px-5 py-2.5 rounded-xl shadow-md shadow-brand-200 hover:shadow-brand-300 transition-all hover:-translate-y-0.5"
-            >
-              Coba Gratis
-            </button>
-          </div>
-
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-100 text-gray-600"
-          >
-            {mobileOpen ? '✕' : '☰'}
-          </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {mobileOpen && (
+      {!minimal && mobileOpen && (
         <div className="md:hidden glass border-t border-white/20 shadow-xl">
           <div className="px-4 py-4 space-y-1">
             {links.map(link => (
@@ -179,7 +183,7 @@ function Hero() {
               onClick={() => navigate('/app')}
               className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-bold text-base rounded-2xl shadow-xl shadow-brand-200 hover:shadow-brand-300 transition-all hover:-translate-y-1 flex items-center justify-center gap-2"
             >
-              Mulai Gratis 14 Hari
+              Mulai Gratis 7 Hari
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </button>
             <button
@@ -363,6 +367,7 @@ function Features() {
 
 // ─── PRICING ──────────────────────────────────────────────────────
 function Pricing() {
+  const navigate = useNavigate()
   const [isYearly, setIsYearly] = useState(false)
   const plans = Object.values(PRICING_PLANS)
 
@@ -381,7 +386,7 @@ function Pricing() {
             <span className="text-gradient">Sesuai Bisnis</span>mu
           </h2>
           <p className="text-gray-500 mt-4 max-w-2xl mx-auto text-lg">
-            Mulai gratis 14 hari, tanpa kartu kredit. Upgrade kapan saja.
+            Mulai gratis 7 hari, tanpa kartu kredit. Upgrade kapan saja.
           </p>
 
           {/* Billing Toggle */}
@@ -458,7 +463,7 @@ function Pricing() {
 
                   {/* CTA */}
                   <button
-                    onClick={() => redirectToCheckout(plan.id, isYearly)}
+                    onClick={() => navigate(`/checkout?plan=${plan.id}&yearly=${isYearly}`)}
                     className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5 ${plan.popular
                       ? 'bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white shadow-lg shadow-brand-200'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
@@ -583,7 +588,7 @@ function FAQ() {
   const faqs = [
     {
       q: 'Apakah ada masa percobaan gratis?',
-      a: 'Ya! Setiap pendaftaran baru mendapatkan 14 hari trial gratis untuk paket Pro. Tanpa perlu kartu kredit.',
+      a: 'Ya! Setiap pendaftaran baru mendapatkan 7 hari trial gratis untuk paket Pro. Tanpa perlu kartu kredit.',
     },
     {
       q: 'Bagaimana jika saya ingin upgrade atau downgrade paket?',
@@ -684,7 +689,7 @@ function CTASection() {
                   onClick={() => navigate('/app')}
                   className="w-full sm:w-auto px-8 py-4 bg-white text-brand-700 font-bold text-base rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1"
                 >
-                  Mulai 14 Hari Gratis →
+                  Mulai 7 Hari Gratis →
                 </button>
                 <button
                   onClick={() => {

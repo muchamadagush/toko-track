@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import LandingPage from './components/LandingPage'
+import Checkout from './components/Checkout'
 import CatatBarang from './components/CatatBarang'
 import DaftarTransaksi from './components/DaftarTransaksi'
 import Rekap from './components/Rekap'
@@ -8,6 +9,7 @@ import KelolaKategori from './components/KelolaKategori'
 import CatatPengeluaran from './components/CatatPengeluaran'
 import DaftarPengeluaran from './components/DaftarPengeluaran'
 import Auth from './components/Auth'
+import Paywall from './components/Paywall'
 import SuperadminDashboard from './components/SuperadminDashboard'
 import ManajemenToko from './components/ManajemenToko'
 import { useTransactions } from './hooks/useTransactions'
@@ -52,7 +54,7 @@ function AppDashboard() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*, stores(name), branches(name)')
+        .select('*, stores(name, trial_ends_at, subscription_status), branches(name)')
         .eq('id', userId)
         .single()
       
@@ -146,6 +148,35 @@ function AppDashboard() {
     navItems.push({ id: 'manajemen', label: 'Manajemen Toko', icon: '⚙️' })
   }
 
+  // Check Trial Status
+  let isTrialExpired = false
+  if (profile && profile.role !== 'superadmin' && profile.stores) {
+    if (useSupabase) {
+      const { trial_ends_at, subscription_status } = profile.stores
+      if (subscription_status !== 'active') {
+        const endDate = new Date(trial_ends_at).getTime()
+        const now = new Date().getTime()
+        if (now > endDate || subscription_status === 'expired' || subscription_status === 'pending_payment') {
+          isTrialExpired = true
+        }
+      }
+    } else {
+      // Local fallback logic
+      const localStatus = localStorage.getItem('local_subscription_status')
+      if (localStatus !== 'active') {
+        const localStartDate = localStorage.getItem('local_trial_start')
+        if (!localStartDate) {
+          localStorage.setItem('local_trial_start', new Date().toISOString())
+        } else {
+          const endDate = new Date(localStartDate).getTime() + (7 * 24 * 60 * 60 * 1000) // +7 days
+          if (new Date().getTime() > endDate) {
+            isTrialExpired = true
+          }
+        }
+      }
+    }
+  }
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
@@ -168,12 +199,18 @@ function AppDashboard() {
   // If role is superadmin
   if (profile?.role === 'superadmin') {
     return (
-      <div className="min-h-screen bg-gray-50 font-sans p-6">
-        <main className="max-w-5xl mx-auto">
-          <SuperadminDashboard onLogout={handleLogout} useSupabase={useSupabase} />
-        </main>
+      <div className="min-h-screen bg-gray-50 font-sans">
+        <SuperadminDashboard onLogout={handleLogout} useSupabase={useSupabase} profile={profile} />
       </div>
     )
+  }
+
+  // If trial is expired, show paywall
+  if (isTrialExpired) {
+    return <Paywall profile={profile} useSupabase={useSupabase} onCheckStatus={() => {
+      setAuthLoading(true)
+      if (user) fetchProfile(user.id)
+    }} />
   }
 
   return (
@@ -348,6 +385,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/app" element={<AppDashboard />} />
     </Routes>
   )
