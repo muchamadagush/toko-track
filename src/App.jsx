@@ -12,6 +12,7 @@ import Auth from './components/Auth'
 import Paywall from './components/Paywall'
 import SuperadminDashboard from './components/SuperadminDashboard'
 import ManajemenToko from './components/ManajemenToko'
+import Settings from './components/Settings'
 import { useTransactions } from './hooks/useTransactions'
 import { useExpenses } from './hooks/useExpenses'
 import { useCategories } from './hooks/useCategories'
@@ -54,7 +55,7 @@ function AppDashboard() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*, stores(name, trial_ends_at, subscription_status), branches(name)')
+        .select('*, stores(name, trial_ends_at, subscription_ends_at, subscription_status, created_at), branches(name)')
         .eq('id', userId)
         .single()
       
@@ -135,19 +136,6 @@ function AppDashboard() {
   const summary = calcSummary(transactions, expenses)
   const isOwner = profile?.role === 'owner'
 
-  // Configure navigation items dynamically based on role
-  const navItems = [
-    { id: 'catat', label: 'Catat Barang', icon: '📝' },
-    { id: 'daftar', label: 'Transaksi', icon: '💰' },
-    { id: 'pengeluaran', label: 'Pengeluaran', icon: '💸' },
-    { id: 'rekap', label: 'Rekap Laporan', icon: '📊' },
-  ]
-
-  if (profile?.role === 'owner') {
-    navItems.push({ id: 'kategori', label: 'Kelola Kategori', icon: '🏷️' })
-    navItems.push({ id: 'manajemen', label: 'Manajemen Toko', icon: '⚙️' })
-  }
-
   // Check Trial Status
   let isTrialExpired = false
   if (profile && profile.role !== 'superadmin' && profile.stores) {
@@ -177,6 +165,40 @@ function AppDashboard() {
     }
   }
 
+  // Configure navigation items dynamically based on role
+  let navItems = []
+
+  if (!isTrialExpired) {
+    navItems = [
+      { id: 'catat', label: 'Catat Barang', icon: '📝' },
+      { id: 'daftar', label: 'Transaksi', icon: '💰' },
+      { id: 'pengeluaran', label: 'Pengeluaran', icon: '💸' },
+      { id: 'rekap', label: 'Rekap Laporan', icon: '📊' },
+    ]
+
+    if (profile?.role === 'owner') {
+      navItems.push({ id: 'kategori', label: 'Kelola Kategori', icon: '🏷️' })
+      navItems.push({ id: 'manajemen', label: 'Manajemen Toko', icon: '🏪' })
+    }
+  }
+
+  navItems.push({
+    id: 'group_settings',
+    label: 'Pengaturan',
+    isGroup: true,
+    subItems: [
+      { id: 'settings_general', label: 'Umum', icon: '⚙️' },
+      { id: 'settings_billing', label: 'Langganan', icon: '💳' },
+      { id: 'settings_history', label: 'Riwayat Transaksi', icon: '📜' }
+    ]
+  })
+  // Force tab to settings_billing if trial expired
+  useEffect(() => {
+    if (isTrialExpired && !tab.startsWith('settings_')) {
+      setTab('settings_billing')
+    }
+  }, [isTrialExpired, tab])
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
@@ -203,14 +225,6 @@ function AppDashboard() {
         <SuperadminDashboard onLogout={handleLogout} useSupabase={useSupabase} profile={profile} />
       </div>
     )
-  }
-
-  // If trial is expired, show paywall
-  if (isTrialExpired) {
-    return <Paywall profile={profile} useSupabase={useSupabase} onCheckStatus={() => {
-      setAuthLoading(true)
-      if (user) fetchProfile(user.id)
-    }} />
   }
 
   return (
@@ -266,17 +280,39 @@ function AppDashboard() {
         {/* Sidebar Nav Links */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setTab(item.id)
-                setMobileMenuOpen(false)
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${tab === item.id ? 'bg-green-50 text-green-700 shadow-sm shadow-green-50/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
-            >
-              <span className="text-base leading-none">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
+            <div key={item.id}>
+              {item.isGroup ? (
+                <div className="mt-4 mb-1">
+                  <span className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider">{item.label}</span>
+                  <div className="mt-2 space-y-1">
+                    {item.subItems.map(sub => (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          setTab(sub.id)
+                          setMobileMenuOpen(false)
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${tab === sub.id ? 'bg-green-50 text-green-700 shadow-sm shadow-green-50/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        <span className="text-base leading-none pl-1">{sub.icon}</span>
+                        <span>{sub.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setTab(item.id)
+                    setMobileMenuOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${tab === item.id ? 'bg-green-50 text-green-700 shadow-sm shadow-green-50/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <span className="text-base leading-none">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              )}
+            </div>
           ))}
         </nav>
 
@@ -331,8 +367,8 @@ function AppDashboard() {
             </div>
           )}
 
-          {/* Summary Strip (Hide when viewing management page) */}
-          {tab !== 'manajemen' && (
+          {/* Summary Strip (Hide when viewing management or settings page) */}
+          {tab !== 'manajemen' && !tab.startsWith('settings_') && (
             <div className={`grid grid-cols-2 ${isOwner ? 'sm:grid-cols-5' : 'sm:grid-cols-3'} gap-3 mb-6`}>
               {[
                 { label: 'Total Transaksi', val: `${summary.count} item` },
@@ -373,6 +409,18 @@ function AppDashboard() {
           )}
           {tab === 'manajemen' && profile?.role === 'owner' && (
             <ManajemenToko profile={profile} useSupabase={useSupabase} />
+          )}
+          {tab.startsWith('settings_') && (
+            <Settings 
+              profile={profile} 
+              useSupabase={useSupabase} 
+              isTrialExpired={isTrialExpired} 
+              activeTab={tab}
+              onCheckStatus={() => {
+                setAuthLoading(true)
+                if (user) fetchProfile(user.id)
+              }} 
+            />
           )}
         </main>
       </div>

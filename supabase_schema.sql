@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS public.stores (
   address             text,
   phone               text,
   trial_ends_at       timestamptz  DEFAULT (now() + interval '7 days'),
+  subscription_ends_at timestamptz,
   subscription_status text         NOT NULL DEFAULT 'trialing',
   created_at          timestamptz  NOT NULL DEFAULT now()
 );

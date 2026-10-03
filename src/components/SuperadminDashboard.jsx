@@ -66,17 +66,28 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
     fetchData()
   }, [fetchData])
 
-  const handleApprovePayment = async (paymentId, storeId) => {
+  const handleApprovePayment = async (paymentId, storeId, jumlah) => {
+    // Hitung masa aktif berdasarkan jumlah yang dibayar
+    const endDate = new Date()
+    if (jumlah >= 1000000) {
+      endDate.setFullYear(endDate.getFullYear() + 1) // Tahunan
+    } else {
+      endDate.setMonth(endDate.getMonth() + 1) // Bulanan
+    }
+
     if (!useSupabase) {
       alert('Mode lokal: Aksi disimulasikan')
       setPayments(p => p.map(x => x.id === paymentId ? { ...x, status: 'approved' } : x))
-      setStores(s => s.map(x => x.id === storeId ? { ...x, subscription_status: 'active' } : x))
+      setStores(s => s.map(x => x.id === storeId ? { ...x, subscription_status: 'active', subscription_ends_at: endDate.toISOString() } : x))
       return
     }
     try {
       setLoading(true)
       await supabase.from('payment_confirmations').update({ status: 'approved' }).eq('id', paymentId)
-      await supabase.from('stores').update({ subscription_status: 'active' }).eq('id', storeId)
+      await supabase.from('stores').update({ 
+        subscription_status: 'active',
+        subscription_ends_at: endDate.toISOString()
+      }).eq('id', storeId)
       await fetchData()
     } catch (err) {
       alert('Gagal approve: ' + err.message)
@@ -277,7 +288,7 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
                             {pay.status === 'pending' && (
                               <div className="flex gap-2 w-full md:w-auto mt-4 md:mt-0">
                                 <button onClick={() => handleRejectPayment(pay.id)} className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-xl text-sm font-bold transition-colors">Tolak</button>
-                                <button onClick={() => handleApprovePayment(pay.id, pay.store_id)} className="flex-1 md:flex-none px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-sm font-bold shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5">Setujui Pembayaran</button>
+                                <button onClick={() => handleApprovePayment(pay.id, pay.store_id, pay.jumlah)} className="flex-1 md:flex-none px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-sm font-bold shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5">Setujui Pembayaran</button>
                               </div>
                             )}
                           </div>

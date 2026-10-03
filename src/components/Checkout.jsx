@@ -12,9 +12,10 @@ export default function Checkout() {
   const isYearly = searchParams.get('yearly') === 'true'
   
   const plan = PRICING_PLANS[planId] || PRICING_PLANS['pro']
-  const price = isYearly && plan.yearlyPrice 
+  const monthlyEquivalent = isYearly && plan.yearlyPrice 
     ? Math.round(plan.yearlyPrice / 12) 
     : plan.monthlyPrice
+  const totalPayable = isYearly ? plan.yearlyPrice : plan.monthlyPrice
 
   const [formData, setFormData] = useState({
     namaToko: '',
@@ -47,8 +48,7 @@ export default function Checkout() {
         .from('stores')
         .insert([{
           name: formData.namaToko,
-          subscription_status: 'pending_payment',
-          trial_ends_at: new Date().toISOString() // Expired immediately
+          subscription_status: 'pending_payment'
         }])
         .select()
         .single()
@@ -76,6 +76,10 @@ export default function Checkout() {
           email: formData.email.trim()
         })
       if (profileError) throw profileError
+
+      // Save billing details to local storage so the dashboard knows the tagihan amount
+      localStorage.setItem('toko_pending_plan_type', isYearly ? 'Tahunan' : 'Bulanan')
+      localStorage.setItem('toko_pending_amount', totalPayable)
 
       // Done! Navigate to App. The AppWrapper will detect 'expired' and show Paywall.
       navigate('/app')
@@ -110,9 +114,14 @@ export default function Checkout() {
                 <p className="text-sm text-brand-200">{isYearly ? 'Tagihan Tahunan' : 'Tagihan Bulanan'}</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold">{formatPrice(price)}</p>
+                <p className="text-2xl font-bold">{formatPrice(monthlyEquivalent)}</p>
                 <p className="text-xs text-brand-200">/ bulan</p>
               </div>
+            </div>
+            
+            <div className="bg-white/20 rounded-xl p-3 mb-4 flex justify-between items-center">
+              <span className="text-sm font-medium">Total ditagih hari ini:</span>
+              <span className="font-bold">{formatPrice(totalPayable)}</span>
             </div>
             
             <hr className="border-white/20 my-4" />

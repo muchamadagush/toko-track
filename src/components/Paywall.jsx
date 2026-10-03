@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function Paywall({ profile, useSupabase, onCheckStatus }) {
+export default function Paywall({ profile, useSupabase, onCheckStatus, nominal, onClose, isConfirmationPending }) {
   const [bank, setBank] = useState('')
   const [nama, setNama] = useState('')
-  const [jumlah, setJumlah] = useState('')
+  const [jumlah, setJumlah] = useState(nominal ? String(nominal) : '')
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10))
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const [isPending, setIsPending] = useState(false)
+  const [isPending, setIsPending] = useState(isConfirmationPending || false)
 
   // Check if there is already a pending confirmation
   useEffect(() => {
@@ -19,7 +19,8 @@ export default function Paywall({ profile, useSupabase, onCheckStatus }) {
         .select('status')
         .eq('store_id', profile.store_id)
         .eq('status', 'pending')
-        .single()
+        .limit(1)
+        .maybeSingle()
       if (data) setIsPending(true)
     }
     checkPending()
@@ -55,9 +56,14 @@ export default function Paywall({ profile, useSupabase, onCheckStatus }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-        <div className="text-center mb-8">
+    <div className="flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-sm p-6 sm:p-8 border border-gray-100 max-h-[90vh] overflow-y-auto scrollbar-hide">
+        <div className="text-center mb-6 relative">
+          {onClose && (
+            <button onClick={onClose} className="absolute -top-2 -right-2 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors">
+              ✕
+            </button>
+          )}
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
             ⏳
           </div>
@@ -71,6 +77,12 @@ export default function Paywall({ profile, useSupabase, onCheckStatus }) {
               ? 'Satu langkah lagi! Silakan selesaikan pembayaran untuk mulai menggunakan TokoTrack.'
               : 'Masa uji coba gratis 7 hari Anda telah berakhir. Silakan lakukan pembayaran untuk melanjutkan penggunaan aplikasi.'}
           </p>
+          {nominal && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-100 rounded-xl">
+              <p className="text-xs text-green-700 font-bold uppercase tracking-wider mb-1">Total Tagihan</p>
+              <p className="text-2xl font-bold text-green-800">Rp {Number(nominal).toLocaleString('id-ID')}</p>
+            </div>
+          )}
         </div>
 
         {isPending ? (

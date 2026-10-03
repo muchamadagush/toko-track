@@ -13,6 +13,8 @@ Aplikasi pencatatan pengeluaran barang, harga modal, harga jual, perhitungan unt
 1. Buka [supabase.com](https://supabase.com) → **New Project**
 2. Buat project baru (simpan password database)
 3. Buka **SQL Editor** → paste isi file `supabase_schema.sql` → klik **Run**
+   - *Penting: Jika Anda menggunakan database lama, tambahkan kolom baru secara manual dengan menjalankan perintah ini di SQL Editor:*
+     `ALTER TABLE public.stores ADD COLUMN subscription_ends_at timestamptz;`
 4. Buka **Project Settings → API**:
    - Salin **Project URL** (contoh: `https://abcd1234.supabase.co`)
    - Salin **anon public key**
