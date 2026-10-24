@@ -141,17 +141,31 @@ function AppDashboard() {
  const summary = calcSummary(transactions, expenses)
  const isOwner = profile?.role === 'owner'
 
- // Check Trial Status
+ // Check Subscription & Trial Status
  let isTrialExpired = false
+ let lockReason = 'none' // 'trial_expired', 'subscription_expired', 'pending_payment'
  if (profile && profile.role !== 'superadmin' && profile.stores) {
  if (useSupabase) {
-  const { trial_ends_at, subscription_status } = profile.stores
-  if (subscription_status !== 'active') {
-  const endDate = new Date(trial_ends_at).getTime()
+  const { trial_ends_at, subscription_status, subscription_ends_at } = profile.stores
   const now = new Date().getTime()
-  if (now > endDate || subscription_status === 'expired' || subscription_status === 'pending_payment') {
+  if (subscription_status === 'active') {
+   if (subscription_ends_at && now > new Date(subscription_ends_at).getTime()) {
+    isTrialExpired = true
+    lockReason = 'subscription_expired'
+   }
+  } else if (subscription_status === 'pending_payment') {
    isTrialExpired = true
-  }
+   lockReason = 'pending_payment'
+  } else if (subscription_status === 'expired') {
+   isTrialExpired = true
+   lockReason = 'subscription_expired'
+  } else {
+   // trialing or other status
+   const endDate = trial_ends_at ? new Date(trial_ends_at).getTime() : 0
+   if (now > endDate) {
+    isTrialExpired = true
+    lockReason = subscription_ends_at ? 'subscription_expired' : 'trial_expired'
+   }
   }
  } else {
   // Local fallback logic
@@ -164,6 +178,7 @@ function AppDashboard() {
    const endDate = new Date(localStartDate).getTime() + (7 * 24 * 60 * 60 * 1000) // +7 days
    if (new Date().getTime() > endDate) {
    isTrialExpired = true
+   lockReason = 'trial_expired'
    }
   }
   }
@@ -377,8 +392,20 @@ function AppDashboard() {
    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start sm:items-center gap-3 text-amber-800">
     <span className="text-xl flex-shrink-0">⏳</span>
     <div className="text-xs sm:text-sm">
-     <p className="font-bold">Masa Uji Coba (Trial) Toko Telah Berakhir</p>
-     <p className="text-amber-700 mt-0.5">Menu Transaksi Penjualan, Kasir, dan Rekap Laporan dikunci sementara. Silakan aktifkan status langganan toko Anda untuk mengakses kembali seluruh data.</p>
+     <p className="font-bold">
+      {lockReason === 'subscription_expired' 
+        ? 'Masa Langganan Toko Telah Berakhir' 
+        : lockReason === 'pending_payment' 
+        ? 'Menunggu Pembayaran Langganan' 
+        : 'Masa Uji Coba (Trial) Toko Telah Berakhir'}
+     </p>
+     <p className="text-amber-700 mt-0.5">
+      {lockReason === 'subscription_expired' 
+        ? 'Periode langganan toko Anda telah selesai. Menu Transaksi Penjualan, Kasir, dan Rekap Laporan dikunci sementara. Silakan perpanjang langganan untuk melanjutkan.'
+        : lockReason === 'pending_payment'
+        ? 'Silakan selesaikan pembayaran langganan atau tunggu konfirmasi admin untuk membuka kembali seluruh fitur.'
+        : 'Masa uji coba gratis 7 hari telah berakhir. Menu Transaksi Penjualan, Kasir, dan Rekap Laporan dikunci sementara. Silakan aktifkan status langganan toko Anda untuk mengakses kembali seluruh data.'}
+     </p>
     </div>
    </div>
    )}

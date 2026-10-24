@@ -257,6 +257,9 @@ export default function Settings({ profile, useSupabase, isTrialExpired, activeT
            </span>
          )
        }
+       if (status === 'expired' || profile?.stores?.subscription_ends_at) {
+         return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600">Langganan Berakhir</span>
+       }
        if (isTrialExpired) {
          return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600">Trial Berakhir</span>
        }

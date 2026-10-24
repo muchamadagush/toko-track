@@ -83,14 +83,19 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
  }
  try {
   setLoading(true)
-  await supabase.from('payment_confirmations').update({ status: 'approved' }).eq('id', paymentId)
-  await supabase.from('stores').update({ 
-  subscription_status: 'active',
-  subscription_ends_at: endDate.toISOString()
-  }).eq('id', storeId)
+  const { error: payErr } = await supabase.from('payment_confirmations').update({ status: 'approved' }).eq('id', paymentId)
+  if (payErr) throw new Error('Gagal update pembayaran: ' + payErr.message)
+  const { data: updatedStores, error: storeErr } = await supabase.from('stores').update({ 
+    subscription_status: 'active',
+    subscription_ends_at: endDate.toISOString()
+  }).eq('id', storeId).select()
+  if (storeErr) throw new Error('Gagal update toko: ' + storeErr.message)
+  if (!updatedStores || updatedStores.length === 0) {
+    throw new Error('Pembayaran disetujui, tapi status toko gagal diupdate (0 baris diubah). Kemungkinan RLS Supabase tabel stores belum mengizinkan superadmin.')
+  }
   await fetchData()
  } catch (err) {
-  alert('Gagal approve: ' + err.message)
+  alert(err.message)
  } finally {
   setLoading(false)
  }
@@ -124,8 +129,17 @@ export default function SuperadminDashboard({ onLogout, useSupabase, profile }) 
  
  try {
   setLoading(true)
-  const { error } = await supabase.from('stores').update({ subscription_status: newStatus }).eq('id', storeId)
+  const updatePayload = { subscription_status: newStatus }
+  if (newStatus === 'active') {
+    const nextMonth = new Date()
+    nextMonth.setMonth(nextMonth.getMonth() + 1)
+    updatePayload.subscription_ends_at = nextMonth.toISOString()
+  }
+  const { data: updatedStores, error } = await supabase.from('stores').update(updatePayload).eq('id', storeId).select()
   if (error) throw error
+  if (!updatedStores || updatedStores.length === 0) {
+    throw new Error('Gagal update status: 0 baris diubah. Periksa hak akses RLS tabel stores pada Supabase.')
+  }
   await fetchData()
  } catch (err) {
   alert('Gagal update status: ' + err.message)
