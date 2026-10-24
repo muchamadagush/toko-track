@@ -373,6 +373,16 @@ function AppDashboard() {
    </div>
    )}
 
+   {isTrialExpired && (
+   <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start sm:items-center gap-3 text-amber-800">
+    <span className="text-xl flex-shrink-0">⏳</span>
+    <div className="text-xs sm:text-sm">
+     <p className="font-bold">Masa Uji Coba (Trial) Toko Telah Berakhir</p>
+     <p className="text-amber-700 mt-0.5">Menu Transaksi Penjualan, Kasir, dan Rekap Laporan dikunci sementara. Silakan aktifkan status langganan toko Anda untuk mengakses kembali seluruh data.</p>
+    </div>
+   </div>
+   )}
+
    {/* Summary Strip (Hide when viewing management or settings page) */}
    {tab !== 'manajemen' && !tab.startsWith('settings_') && (
    <div className={`grid grid-cols-2 ${isOwner ? 'sm:grid-cols-5' : 'sm:grid-cols-3'} gap-3 mb-6`}>
@@ -422,12 +432,6 @@ function AppDashboard() {
     useSupabase={useSupabase} 
     isTrialExpired={isTrialExpired} 
     activeTab={tab}
-    progressSteps={progressSteps}
-    onAddProgress={addStep}
-    onUpdateProgress={updateStep}
-    onDeleteProgress={deleteStep}
-    onReorderProgress={reorderSteps}
-    loadingProgress={pLoading}
     progressSteps={progressSteps}
     onAddProgress={addStep}
     onUpdateProgress={updateStep}

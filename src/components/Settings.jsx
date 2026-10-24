@@ -245,18 +245,26 @@ export default function Settings({ profile, useSupabase, isTrialExpired, activeT
      </td>
      <td className="px-4 py-4 font-bold text-gray-900">Rp {nominal.toLocaleString('id-ID')}</td>
      <td className="px-4 py-4">
-     <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-      profile?.stores?.subscription_status === 'pending_payment' 
-      ? (isConfirmationPending ? 'bg-brand-pale-green text-brand-green' : 'bg-amber-50 text-amber-600') 
-      : 'bg-brand-pale-green text-brand-dark-green'
-     }`}>
-      {profile?.stores?.subscription_status === 'pending_payment' 
-      ? (isConfirmationPending ? 'Menunggu Konfirmasi' : 'Menunggu Pembayaran') 
-      : 'Aktif'}
-     </span>
+     {(() => {
+       const status = profile?.stores?.subscription_status
+       if (status === 'active') {
+         return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-pale-green text-brand-dark-green">Aktif</span>
+       }
+       if (status === 'pending_payment') {
+         return (
+           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${isConfirmationPending ? 'bg-brand-pale-green text-brand-green' : 'bg-amber-50 text-amber-600'}`}>
+             {isConfirmationPending ? 'Menunggu Konfirmasi' : 'Menunggu Pembayaran'}
+           </span>
+         )
+       }
+       if (isTrialExpired) {
+         return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600">Trial Berakhir</span>
+       }
+       return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">Masa Trial</span>
+     })()}
      </td>
      <td className="px-4 py-4">
-     {profile?.stores?.subscription_status === 'pending_payment' ? (
+     {(profile?.stores?.subscription_status === 'pending_payment' || isTrialExpired || profile?.stores?.subscription_status !== 'active') ? (
       <button 
       onClick={() => setShowPaywallModal(true)}
       className={`px-4 py-2 text-white text-xs font-bold rounded-lg transition-colors shadow-sm ${
@@ -265,7 +273,7 @@ export default function Settings({ profile, useSupabase, isTrialExpired, activeT
         : 'bg-brand-green hover:bg-brand-dark-green'
       }`}
       >
-      {isConfirmationPending ? 'Cek Status' : 'Bayar'}
+      {isConfirmationPending ? 'Cek Status' : 'Aktifkan / Bayar'}
       </button>
      ) : (
       <span className="text-gray-400 font-bold">-</span>
