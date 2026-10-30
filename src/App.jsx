@@ -17,7 +17,6 @@ import { useTransactions } from './hooks/useTransactions'
 import { useExpenses } from './hooks/useExpenses'
 import { useCategories } from './hooks/useCategories'
 import { useProgressSteps } from './hooks/useProgressSteps'
-import { calcSummary, fmtShort, fmt } from './lib/utils'
 import { supabase, signOut } from './lib/supabase'
 
 // ─── App Dashboard (existing app logic) ───────────────────────────
@@ -138,7 +137,6 @@ function AppDashboard() {
 
   const loading = tLoading || eLoading
  const error = tError
- const summary = calcSummary(transactions, expenses)
  const isOwner = profile?.role === 'owner'
 
  // Check Subscription & Trial Status
@@ -410,26 +408,6 @@ function AppDashboard() {
    </div>
    )}
 
-   {/* Summary Strip (Hide when viewing management or settings page) */}
-   {tab !== 'manajemen' && !tab.startsWith('settings_') && (
-   <div className={`grid grid-cols-2 ${isOwner ? 'sm:grid-cols-5' : 'sm:grid-cols-3'} gap-3 mb-6`}>
-    {[
-    { label: 'Total Transaksi', val: `${summary.count} item` },
-    isOwner && { label: 'Total Modal', val: fmt(summary.totalModal) },
-    { label: 'Total Penjualan', val: fmt(summary.totalJual) },
-    { label: 'Pengeluaran', val: fmt(summary.totalExpense), highlight: 'red' },
-    isOwner && { label: summary.totalLaba >= 0 ? 'Laba Bersih' : 'Rugi Bersih', val: fmt(summary.totalLaba), highlight: summary.totalLaba >= 0 ? 'green' : 'red' },
-    ].filter(Boolean).map(c => (
-    <div key={c.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3">
-     <p className="text-xs text-gray-400 mb-0.5">{c.label}</p>
-     <p className={`text-base sm:text-lg font-bold ${c.highlight === 'green' ? 'text-brand-green' : c.highlight === 'red' ? 'text-red-500' : 'text-gray-800'}`}>
-     {summary.count === 0 && c.label !== 'Pengeluaran' ? (c.label === 'Total Transaksi' ? '0 item' : 'Rp 0') : c.val}
-     </p>
-    </div>
-    ))}
-   </div>
-   )}
-
    {/* View Dispatcher */}
    {tab === 'catat' && <CatatBarang onAdd={addTransaction} categories={categories} profile={profile} />}
    {tab === 'daftar' && <DaftarTransaksi transactions={transactions} categories={categories} progressSteps={progressSteps} onDelete={deleteTransaction} onUpdate={updateTransaction} onDeleteAll={deleteAll} loading={loading} profile={profile} />}
@@ -439,7 +417,7 @@ function AppDashboard() {
     <DaftarPengeluaran expenses={expenses} onDelete={deleteExpense} onDeleteAll={deleteAllExpenses} loading={loading} />
    </div>
    )}
-   {tab === 'rekap' && <Rekap transactions={transactions} expenses={expenses} />}
+   {tab === 'rekap' && <Rekap transactions={transactions} expenses={expenses} profile={profile} />}
    {tab === 'kategori' && profile?.role === 'owner' && (
    <KelolaKategori
     categories={categories}
