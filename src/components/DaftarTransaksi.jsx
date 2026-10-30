@@ -1,12 +1,29 @@
-import { useState, useRef } from 'react'
-import { fmt, calcItem, STATUS_PESANAN, STATUS_COLOR } from '../lib/utils'
+import { useState, useRef, useMemo } from 'react'
+import { fmt, calcItem, STATUS_PESANAN, STATUS_COLOR, MONTHS_FULL } from '../lib/utils'
+
+function parseDateParts(dateStr) {
+  if (!dateStr) return { year: null, month: null }
+  if (typeof dateStr === 'string' && dateStr.includes('-')) {
+    const parts = dateStr.slice(0, 10).split('-')
+    if (parts.length >= 2) {
+      return {
+        year: parseInt(parts[0], 10),
+        month: parseInt(parts[1], 10) - 1,
+      }
+    }
+  }
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? { year: null, month: null } : { year: d.getFullYear(), month: d.getMonth() }
+}
 import { toPng } from 'html-to-image'
 import Receipt from './Receipt'
 
 export default function DaftarTransaksi({ transactions, categories, progressSteps, onDelete, onUpdate, onDeleteAll, loading, profile }) {
  const isOwner = profile?.role === 'owner'
  const [search, setSearch] = useState('')
- const [filterKat, setFilterKat] = useState('Semua')
+  const [filterBulan, setFilterBulan] = useState('Semua')
+  const [filterTahun, setFilterTahun] = useState('Semua')
+  const [filterKat, setFilterKat] = useState('Semua')
  const [filterStatus, setFilterStatus] = useState('Semua')
  const [sortBy, setSortBy] = useState('tanggal_desc')
  const [deleting, setDeleting] = useState(null)
@@ -18,6 +35,21 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
  const [downloading, setDownloading] = useState(false)
 
  const today = new Date().toISOString().slice(0, 10)
+
+ const availableYears = useMemo(() => {
+  const curYear = new Date().getFullYear()
+  const set = new Set(
+   (transactions || [])
+    .map(t => {
+     if (!t.tanggal) return null
+     const { year } = parseDateParts(t.tanggal)
+     return year
+    })
+    .filter(Boolean)
+  )
+  if (!set.has(curYear)) set.add(curYear)
+  return Array.from(set).sort((a, b) => b - a)
+ }, [transactions])
 
  // 1. Grouping logic
  const groupsMap = transactions.reduce((acc, d) => {
@@ -65,7 +97,11 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
   (g.catatan || '').toLowerCase().includes(q)
   const matchKat = filterKat === 'Semua' || g.kategori === filterKat
   const matchStatus = filterStatus === 'Semua' || g.status_pesanan === filterStatus
-  return matchSearch && matchKat && matchStatus
+  const { year: gYear, month: gMonth } = parseDateParts(g.tanggal)
+  const matchBulan = filterBulan === 'Semua' || gMonth === parseInt(filterBulan, 10)
+  const matchTahun = filterTahun === 'Semua' || gYear === parseInt(filterTahun, 10)
+
+  return matchSearch && matchKat && matchStatus && matchBulan && matchTahun
  })
  .sort((a, b) => {
   if (sortBy === 'tanggal_desc') return new Date(b.tanggal) - new Date(a.tanggal) || new Date(b.created_at) - new Date(a.created_at)
@@ -166,7 +202,26 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
  return (
  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-  <h2 className="text-lg font-semibold text-gray-900">Daftar Transaksi</h2>
+  <div className="flex items-center gap-2.5">
+    <h2 className="text-lg font-semibold text-gray-900">Daftar Transaksi</h2>
+    <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full font-medium">
+     {filteredGroups.length} transaksi
+    </span>
+   </div>
+   {(filterBulan !== 'Semua' || filterTahun !== 'Semua' || filterKat !== 'Semua' || filterStatus !== 'Semua' || search) && (
+    <button
+     onClick={() => {
+      setSearch('')
+      setFilterBulan('Semua')
+      setFilterTahun('Semua')
+      setFilterKat('Semua')
+      setFilterStatus('Semua')
+     }}
+     className="text-xs text-brand-green hover:underline font-medium self-start sm:self-center"
+    >
+     Reset Filter
+    </button>
+   )}
   </div>
 
   {/* Filters */}
@@ -174,6 +229,20 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
   <input placeholder="Cari barang, jenis, pembeli..."
    value={search} onChange={e => setSearch(e.target.value)}
    className="flex-1 min-w-[160px] border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-transparent" />
+  <select value={filterBulan} onChange={e => setFilterBulan(e.target.value)}
+   className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green">
+   <option value="Semua">Semua Bulan</option>
+   {MONTHS_FULL.map((m, i) => (
+    <option key={i} value={i}>{m}</option>
+   ))}
+  </select>
+  <select value={filterTahun} onChange={e => setFilterTahun(e.target.value)}
+   className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green">
+   <option value="Semua">Semua Tahun</option>
+   {availableYears.map(y => (
+    <option key={y} value={y}>{y}</option>
+   ))}
+  </select>
   <select value={filterKat} onChange={e => setFilterKat(e.target.value)}
    className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-green">
    <option value="Semua">Semua Kategori</option>
