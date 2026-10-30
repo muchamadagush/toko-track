@@ -27,7 +27,7 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
  const [search, setSearch] = useState('')
   const [filterBulan, setFilterBulan] = useState(curMonth)
   const [filterTahun, setFilterTahun] = useState(curYear)
-  const isFiltered = filterBulan !== curMonth || filterTahun !== curYear || filterKat !== 'Semua' || filterStatus !== 'Semua' || search.trim() !== ''
+
   const [filterKat, setFilterKat] = useState('Semua')
  const [filterStatus, setFilterStatus] = useState('Semua')
  const [sortBy, setSortBy] = useState('tanggal_desc')
@@ -40,9 +40,10 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
  const [downloading, setDownloading] = useState(false)
 
  const today = new Date().toISOString().slice(0, 10)
+ const isFiltered = filterBulan !== curMonth || filterTahun !== curYear || filterKat !== 'Semua' || filterStatus !== 'Semua' || search.trim() !== ''
 
  const availableYears = useMemo(() => {
-  const curYear = new Date().getFullYear()
+  const curYearVal = new Date().getFullYear()
   const set = new Set(
    (transactions || [])
     .map(t => {
@@ -52,7 +53,7 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
     })
     .filter(Boolean)
   )
-  if (!set.has(curYear)) set.add(curYear)
+  if (!set.has(curYearVal)) set.add(curYearVal)
   return Array.from(set).sort((a, b) => b - a)
  }, [transactions])
 
