@@ -20,9 +20,14 @@ import Receipt from './Receipt'
 
 export default function DaftarTransaksi({ transactions, categories, progressSteps, onDelete, onUpdate, onDeleteAll, loading, profile }) {
  const isOwner = profile?.role === 'owner'
+ const now = new Date()
+ const curMonth = now.getMonth()
+ const curYear = now.getFullYear()
+
  const [search, setSearch] = useState('')
-  const [filterBulan, setFilterBulan] = useState('Semua')
-  const [filterTahun, setFilterTahun] = useState('Semua')
+  const [filterBulan, setFilterBulan] = useState(curMonth)
+  const [filterTahun, setFilterTahun] = useState(curYear)
+  const isFiltered = filterBulan !== curMonth || filterTahun !== curYear || filterKat !== 'Semua' || filterStatus !== 'Semua' || search.trim() !== ''
   const [filterKat, setFilterKat] = useState('Semua')
  const [filterStatus, setFilterStatus] = useState('Semua')
  const [sortBy, setSortBy] = useState('tanggal_desc')
@@ -207,13 +212,16 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
     <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full font-medium">
      {filteredGroups.length} transaksi
     </span>
+    <span className="text-[11px] bg-brand-pale-green text-brand-dark-green px-2.5 py-0.5 rounded-full font-medium">
+     {filterBulan !== 'Semua' ? MONTHS_FULL[filterBulan] : 'Semua Bulan'} {filterTahun !== 'Semua' ? filterTahun : 'Semua Tahun'}
+    </span>
    </div>
-   {(filterBulan !== 'Semua' || filterTahun !== 'Semua' || filterKat !== 'Semua' || filterStatus !== 'Semua' || search) && (
+   {isFiltered && (
     <button
      onClick={() => {
       setSearch('')
-      setFilterBulan('Semua')
-      setFilterTahun('Semua')
+      setFilterBulan(curMonth)
+      setFilterTahun(curYear)
       setFilterKat('Semua')
       setFilterStatus('Semua')
      }}
@@ -269,7 +277,37 @@ export default function DaftarTransaksi({ transactions, categories, progressStep
   <div className="text-center py-12 text-gray-400 text-sm">Memuat data...</div>
   ) : filteredGroups.length === 0 ? (
   <div className="text-center py-12 text-gray-400 text-sm">
-   {transactions.length === 0 ? 'Belum ada data. Tambahkan pencatatan barang terlebih dahulu.' : 'Tidak ada hasil yang cocok.'}
+   <p>{transactions.length === 0 ? 'Belum ada data. Tambahkan pencatatan barang terlebih dahulu.' : 'Tidak ada transaksi pada periode/filter ini.'}</p>
+   {transactions.length > 0 && (
+    <div className="mt-2 flex items-center justify-center gap-3">
+     <button
+      onClick={() => {
+       setFilterBulan('Semua')
+       setFilterTahun('Semua')
+       setFilterKat('Semua')
+       setFilterStatus('Semua')
+       setSearch('')
+      }}
+      className="text-xs text-brand-green hover:underline font-medium"
+     >
+      Lihat Semua Periode
+     </button>
+     {isFiltered && (
+      <button
+       onClick={() => {
+        setFilterBulan(curMonth)
+        setFilterTahun(curYear)
+        setFilterKat('Semua')
+        setFilterStatus('Semua')
+        setSearch('')
+       }}
+       className="text-xs text-gray-500 hover:underline font-medium"
+      >
+       Kembali ke Bulan Ini
+      </button>
+     )}
+    </div>
+   )}
   </div>
   ) : (
   <div className="space-y-4">

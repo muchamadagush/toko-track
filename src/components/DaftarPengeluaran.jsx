@@ -17,12 +17,16 @@ function parseDateParts(dateStr) {
 }
 
 export default function DaftarPengeluaran({ expenses = [], onDelete, onDeleteAll, loading }) {
+  const now = new Date()
+  const curMonth = now.getMonth()
+  const curYear = now.getFullYear()
+
   const [search, setSearch] = useState('')
-  const [filterBulan, setFilterBulan] = useState('Semua')
-  const [filterTahun, setFilterTahun] = useState('Semua')
+  const [filterBulan, setFilterBulan] = useState(curMonth)
+  const [filterTahun, setFilterTahun] = useState(curYear)
 
   const availableYears = useMemo(() => {
-    const curYear = new Date().getFullYear()
+    const curYearVal = new Date().getFullYear()
     const set = new Set(
       expenses
         .map(e => {
@@ -32,7 +36,7 @@ export default function DaftarPengeluaran({ expenses = [], onDelete, onDeleteAll
         })
         .filter(Boolean)
     )
-    if (!set.has(curYear)) set.add(curYear)
+    if (!set.has(curYearVal)) set.add(curYearVal)
     return Array.from(set).sort((a, b) => b - a)
   }, [expenses])
 
@@ -55,7 +59,7 @@ export default function DaftarPengeluaran({ expenses = [], onDelete, onDeleteAll
 
   if (loading) return <div className="text-center py-12 text-gray-400">Memuat data...</div>
 
-  const isFiltered = filterBulan !== 'Semua' || filterTahun !== 'Semua' || search.trim() !== ''
+  const isFiltered = filterBulan !== curMonth || filterTahun !== curYear || search.trim() !== ''
 
   return (
     <div className="space-y-4">
@@ -64,13 +68,11 @@ export default function DaftarPengeluaran({ expenses = [], onDelete, onDeleteAll
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <p className="text-xs text-gray-400">Total Pengeluaran</p>
-            {(filterBulan !== 'Semua' || filterTahun !== 'Semua') && (
-              <span className="text-[11px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-medium">
-                {filterBulan !== 'Semua' ? MONTHS_FULL[filterBulan] : ''}
-                {filterBulan !== 'Semua' && filterTahun !== 'Semua' ? ' ' : ''}
-                {filterTahun !== 'Semua' ? filterTahun : ''}
-              </span>
-            )}
+            <span className="text-[11px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-medium">
+              {filterBulan !== 'Semua' ? MONTHS_FULL[filterBulan] : 'Semua Bulan'}
+              {' '}
+              {filterTahun !== 'Semua' ? filterTahun : 'Semua Tahun'}
+            </span>
           </div>
           <p className="text-2xl font-bold text-red-600">{fmt(total)}</p>
           <p className="text-xs text-gray-400 mt-0.5">
@@ -121,8 +123,8 @@ export default function DaftarPengeluaran({ expenses = [], onDelete, onDeleteAll
             <button
               onClick={() => {
                 setSearch('')
-                setFilterBulan('Semua')
-                setFilterTahun('Semua')
+                setFilterBulan(curMonth)
+                setFilterTahun(curYear)
               }}
               className="px-3 py-2 text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-medium"
             >
@@ -148,9 +150,37 @@ export default function DaftarPengeluaran({ expenses = [], onDelete, onDeleteAll
               {filteredExpenses.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-gray-400">
-                    {expenses.length === 0
-                      ? 'Belum ada pengeluaran tercatat'
-                      : 'Tidak ada pengeluaran yang cocok dengan filter'}
+                    <p>
+                      {expenses.length === 0
+                        ? 'Belum ada pengeluaran tercatat'
+                        : 'Tidak ada pengeluaran pada periode/filter ini'}
+                    </p>
+                    {expenses.length > 0 && (
+                      <div className="mt-2 flex items-center justify-center gap-3">
+                        <button
+                          onClick={() => {
+                            setFilterBulan('Semua')
+                            setFilterTahun('Semua')
+                            setSearch('')
+                          }}
+                          className="text-xs text-red-500 hover:underline font-medium"
+                        >
+                          Lihat Semua Periode
+                        </button>
+                        {isFiltered && (
+                          <button
+                            onClick={() => {
+                              setFilterBulan(curMonth)
+                              setFilterTahun(curYear)
+                              setSearch('')
+                            }}
+                            className="text-xs text-gray-500 hover:underline font-medium"
+                          >
+                            Kembali ke Bulan Ini
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ) : (
